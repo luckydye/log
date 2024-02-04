@@ -1,0 +1,9 @@
+{
+	"name": "@luckydye/log",
+	"description": "A tiny JavaScript logging library inspired by charmbracelet/log.",
+	"main": "lib.js",
+	"type": "module",
+	"dependencies": {
+		"chalk": "^5.3.0"
+	}
+}
