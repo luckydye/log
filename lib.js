@@ -1,4 +1,5 @@
-import chalk from './node_modules/chalk/source/index';
+import chalk from 'chalk';
+// TODO: replace chalk with custom colorizer
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 

@@ -1,6 +1,9 @@
 {
 	"name": "@luckydye/log",
 	"version": "0.1.0",
+	"publishConfig": {
+    "access": "public"
+  },
 	"description": "A tiny JavaScript logging library inspired by charmbracelet/log.",
 	"main": "lib.js",
 	"type": "module",
