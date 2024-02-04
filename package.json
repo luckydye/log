@@ -7,6 +7,10 @@
 		"chalk": "^5.3.0"
 	},
 	"files": [
-    "lib.js"
-  ]
+		"lib.js"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^1.5.3",
+		"@types/node": "^20.11.16"
+	}
 }
