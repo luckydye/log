@@ -32,3 +32,12 @@ logJson.info('Hello, world!');
 ```bash
 {"ts":"02/05/2024, 12:36 AM","level":"info","prefix":"Json","location":"log/log.js:119:14","msg":"Hello, world!","args":["Hello, world!"]}
 ```
+
+### Deno
+
+```javascript
+import logger from "npm:@luckydye/log";
+
+const log = logger().prefix("Deno");
+log.error("Test error");
+```
