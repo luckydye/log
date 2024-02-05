@@ -1,4 +1,5 @@
-import logger, { InfluxWriteStream } from './log';
+import logger from './log';
+import { InfluxWriteStream } from './influx';
 import { it, describe } from 'bun:test';
 
 describe('log', () => {

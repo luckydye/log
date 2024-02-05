@@ -1,6 +1,6 @@
-# logging
+# log
 
-A tiny JavaScript logging library inspired by charmbracelet/log.
+A small (2.3KB gzipped minified) JavaScript logging library inspired by charmbracelet/log.
 
 ## Usage
 

@@ -3,6 +3,7 @@
 
 import chalk from 'chalk';
 
+const IS_RUNTIME = typeof process !== 'undefined';
 const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
@@ -63,6 +64,8 @@ function level(lvl) {
 			return chalk.yellow(lvl.toUpperCase());
 		case 'error':
 			return chalk.red(lvl.toUpperCase());
+		case 'debug':
+			return chalk.gray(lvl.toUpperCase());
 		default:
 			return lvl.toUpperCase();
 	}
@@ -101,7 +104,7 @@ class Logger {
 	 * Log level
 	 * @type {string} - debug > error > warn > info
 	 */
-	#level = 'info';
+	#level = 'debug';
 
 	/**
 	 * Display output stream
@@ -122,47 +125,31 @@ class Logger {
 					obj.prefix && chalk.gray(obj.prefix),
 				]
 					.filter(Boolean)
-					.join(' ')}${chalk.gray(':')} ${obj.msg}`;
+					.join(' ')}`;
 			}
 
-			if (IS_BROWSER) {
+			if (IS_RUNTIME) {
 				switch (obj.level) {
-					case 'debug':
-						console.debug(
-							`${obj.ts} %c${obj.prefix}`,
-							`color: gray; font-weight: normal`,
-							...obj.args
-						);
-						break;
 					case 'error':
-						console.error(
-							`${obj.ts} %c${obj.prefix}`,
-							`color: gray; font-weight: normal`,
-							...obj.args
-						);
-						break;
-					case 'warn':
-						console.warn(
-							`${obj.ts} %c${obj.prefix}`,
-							`color: gray; font-weight: normal`,
-							...obj.args
-						);
+						process.stderr.write(`${str}${chalk.gray(':')} ${obj.msg}` + '\n');
 						break;
 					default:
-						console.log(
-							`${obj.ts} %c${obj.prefix}`,
-							`color: gray; font-weight: normal`,
-							...obj.args
-						);
+						process.stdout.write(`${str}${chalk.gray(':')} ${obj.msg}` + '\n');
 						break;
 				}
-			} else {
+			} else if (IS_BROWSER) {
 				switch (obj.level) {
+					case 'debug':
+						console.debug(str, ...obj.args);
+						break;
 					case 'error':
-						process.stderr.write(str + '\n');
+						console.error(str, ...obj.args);
+						break;
+					case 'warn':
+						console.warn(str, ...obj.args);
 						break;
 					default:
-						process.stdout.write(str + '\n');
+						console.info(str, ...obj.args);
 						break;
 				}
 			}
@@ -213,8 +200,10 @@ class Logger {
 	}
 
 	constructor() {
-		if (process.env.JS_LOG != undefined) {
-			this.#level = process.env.JS_LOG;
+		if (IS_RUNTIME) {
+			if (process.env.JS_LOG != undefined) {
+				this.#level = process.env.JS_LOG;
+			}
 		}
 	}
 
@@ -226,18 +215,16 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	#log = (level, ...args) => {
-		const obj = {
-			ts: new Date(),
-			level: level,
-			prefix: this.#prefix,
-			location: this.#trace && trace(),
-			msg: args.join(' '),
-			args: args,
-		};
-
 		for (const stream of this.#output) {
 			const writer = stream.getWriter();
-			writer.write(obj);
+			writer.write({
+				ts: new Date(),
+				level: level,
+				prefix: this.#prefix,
+				location: this.#trace && trace(),
+				msg: args.join(' '),
+				args: args,
+			});
 			writer.releaseLock();
 		}
 	};
@@ -277,33 +264,4 @@ class Logger {
 
 export default function logger() {
 	return new Logger();
-}
-
-/**
- * Writable stream to InfluxDB
- */
-export class InfluxWriteStream extends WritableStream {
-	/**
-	 * @param {{ url: string, bucket: string, db: string, org: string, token: string }} options
-	 */
-	constructor(options) {
-		super({
-			async write(msg) {
-				return await fetch(
-					`${options.url}/api/v2/write?org=${options.org}&bucket=${options.bucket}&precision=ms`,
-					{
-						method: 'POST',
-						headers: {
-							Authorization: `Token ${options.token}`,
-						},
-						body: `${options.db},level=${msg.level} msg="${msg.msg}" ${msg.ts.valueOf()}`,
-					}
-				).then(async (res) => {
-					if (!res.ok) {
-						throw new Error('Failed to write to InfluxDB: ' + (await res.text()));
-					}
-				});
-			},
-		});
-	}
 }

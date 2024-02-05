@@ -1,0 +1,19 @@
+<html>
+
+<body>
+    <script type="module">
+        import logger from './log.js';
+
+        const log = logger().prefix('Test').trace();
+
+        log.info('Hello, world!', "x", {
+            y: true
+        });
+
+        log.error('This is an error!');
+        log.warn('This is a warning!');
+        log.debug('A debug message!');
+    </script>
+</body>
+
+</html>
