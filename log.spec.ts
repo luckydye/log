@@ -24,7 +24,7 @@ describe('log', () => {
 					org: 'test',
 					bucket: 'test',
 					db: 'test',
-					url: 'test',
+					url: 'https://test',
 					token: 'test',
 				})
 			);

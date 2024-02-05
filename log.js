@@ -8,7 +8,7 @@ const IS_RUNTIME = typeof process !== 'undefined';
 const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
-const LOG_LEVELS = ['info', 'warn', 'error', 'debug'];
+const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
 
 /**
  * Generate timestamp string
@@ -105,7 +105,7 @@ class Logger {
 	 * Log level
 	 * @type {string} - debug > error > warn > info
 	 */
-	#level = 'error';
+	#level = 'info';
 
 	/**
 	 * Display output stream
