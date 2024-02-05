@@ -11,20 +11,21 @@ const LOG_LEVELS = ['info', 'warn', 'error', 'debug'];
 /**
  * Generate timestamp string
  * @param {string | boolean} format
+ * @param {Date} date
  */
-function timestamp(format) {
+function timestamp(format, date) {
 	switch (format) {
 		case 'kitchen':
-			return new Date().toLocaleTimeString(undefined, {
+			return date.toLocaleTimeString(undefined, {
 				hour: '2-digit',
 				minute: '2-digit',
 			});
 		case 'iso':
-			return new Date().toISOString();
+			return date.toISOString();
 		case 'utc':
-			return new Date().toUTCString();
+			return date.toUTCString();
 		default:
-			return new Date().toLocaleString(undefined, {
+			return date.toLocaleString(undefined, {
 				hour: '2-digit',
 				minute: '2-digit',
 				day: '2-digit',
@@ -115,7 +116,7 @@ class Logger {
 				str = JSON.stringify(obj);
 			} else {
 				str = `${[
-					this.#time && obj.ts,
+					this.#time && timestamp(this.#time, obj.ts),
 					obj.level && level(obj.level),
 					obj.location && chalk.gray(`<${obj.location}>`),
 					obj.prefix && chalk.gray(obj.prefix),
@@ -226,7 +227,7 @@ class Logger {
 	 */
 	#log = (level, ...args) => {
 		const obj = {
-			ts: this.#time && timestamp(this.#time),
+			ts: new Date(),
 			level: level,
 			prefix: this.#prefix,
 			location: this.#trace && trace(),
@@ -289,15 +290,13 @@ export class InfluxWriteStream extends WritableStream {
 		super({
 			async write(msg) {
 				return await fetch(
-					`${options.url}/api/v2/write?bucket=${options.bucket}&org=${options.org}`,
+					`${options.url}/api/v2/write?org=${options.org}&bucket=${options.bucket}&precision=ms`,
 					{
 						method: 'POST',
 						headers: {
 							Authorization: `Token ${options.token}`,
 						},
-						body: `${options.db},${Object.keys(msg)
-							.map((key) => `${key}='${msg[key]}'`)
-							.join(' ')}`,
+						body: `${options.db},level=${msg.level} msg="${msg.msg}" ${msg.ts.valueOf()}`,
 					}
 				).then(async (res) => {
 					if (!res.ok) {
