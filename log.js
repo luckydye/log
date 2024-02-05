@@ -1,5 +1,6 @@
 // TODO: replace chalk with custom colorizer
 // TODO: make smaller
+// TODO: try to match rust logger namespacing
 
 import chalk from 'chalk';
 
