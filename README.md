@@ -1,6 +1,6 @@
 # log
 
-A small (<2KB gzipped minified) JavaScript logging library inspired by charmbracelet/log.
+A small (<2KB gzipped minified) JavaScript logging library inspired by charmbracelet/log and docs.rs/env_logger.
 
 ## Usage
 
