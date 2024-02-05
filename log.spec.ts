@@ -21,12 +21,11 @@ describe('log', () => {
 			.time(false)
 			.pipeTo(
 				new InfluxWriteStream({
-					org: 'ekko',
+					org: 'test',
 					bucket: 'test',
 					db: 'test',
-					url: 'https://logging.luckydye.de',
-					token:
-						'agqaDudQ-m9BRzgaWyosOk6QYKXRNhJZPP677HHygtGdbU5Rh8yUMr7yDpftEIQLOd5f7jL0Jjevb5NyCoBlCw==',
+					url: 'test',
+					token: 'test',
 				})
 			);
 
