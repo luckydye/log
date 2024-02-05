@@ -17,7 +17,7 @@ export class InfluxWriteStream extends WritableStream {
 						},
 						body:
 							options.db +
-							`,level=${msg.level} prefix=${msg.prefix} msg="${msg.args.join(' ')}"` +
+							`,level=${msg.level} prefix="${msg.prefix}" msg="${msg.args.join(' ')}" ` +
 							msg.ts.valueOf(),
 					}
 				).then(async (res) => {
