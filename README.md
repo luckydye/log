@@ -22,8 +22,20 @@ log.error("This is an error!");
 ```
 
 ```bash
-02/05/2024, 12:36 AM INFO <log/log.js:121:14> Test: Log info
-02/05/2024, 12:36 AM ERROR <log/log.js:122:14> Test: This is an error!
+02/05/2024 13:32:23 INFO <log.spec.ts:7:13> Test: Hello, world!
+02/05/2024 13:32:53 ERROR <log.spec.ts:7:41> Test: This is an error!
+```
+
+### Formatted arguments
+
+```javascript
+log.warn('An Object', 'obj', { one: 2 });
+```
+
+```bash
+02/05/2024 16:01:51 WARN <log.spec.ts:15:61> An Object obj={
+  "one": 2
+}
 ```
 
 ### JSON output
@@ -34,7 +46,7 @@ logJson.info('Hello, world!');
 ```
 
 ```bash
-{"ts":"02/05/2024, 12:36 AM","level":"info","prefix":"Json","location":"log/log.js:119:14","msg":"Hello, world!"}
+{"ts":"2024-02-05T13:33:05.270Z","level":"info","prefix":"Json","location":"log.spec.ts:9:48","msg":"Hello, world!","args":["Hello, world!"]}
 ```
 
 ### Deno
@@ -44,6 +56,30 @@ import logger from "npm:@luckydye/log";
 
 const log = logger().prefix("Deno");
 log.error("Test error");
+```
+
+### InfluxDB
+
+Send logs to a InfluxDB (v2).
+
+```javascript
+import logger from "@luckydye/log";
+import { InfluxWriteStream } from '@luckydye/log/influx';
+
+const log = logger()
+			.prefix('Influx')
+			.pipeTo(
+				new InfluxWriteStream({
+					org: 'organisation',
+					bucket: 'bucket_name',
+					db: 'database_name',
+					url: 'https://influxdb.example.com',
+					token: 'ACCESS_TOKEN',
+				})
+			);
+
+// JS_LOG filtering applies here as well
+log.info('Hello, world!');
 ```
 
 ## Environment variables

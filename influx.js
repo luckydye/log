@@ -15,7 +15,10 @@ export class InfluxWriteStream extends WritableStream {
 						headers: {
 							Authorization: `Token ${options.token}`,
 						},
-						body: `${options.db},level=${msg.level} msg="${msg.msg}" ${msg.ts.valueOf()}`,
+						body:
+							options.db +
+							`,level=${msg.level} prefix=${msg.prefix} msg="${msg.args.join(' ')}"` +
+							msg.ts.valueOf(),
 					}
 				).then(async (res) => {
 					if (!res.ok) {

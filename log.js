@@ -1,9 +1,18 @@
-// TODO: make smaller
-// TODO: try to match rust logger namespacing
-
 const IS_RUNTIME = typeof process !== 'undefined';
 const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+/**
+  * @typedef {{
+			ts: Date,
+			level: 'error' | 'warn' | 'info' | 'debug',
+			prefix?: string,
+			location?: string | false,
+			message?: string,
+			args: any[],
+			parsedArgs: Record<string, any> | undefined,
+		}} LogObject
+*/
 
 // Log levels ordered by severity
 const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
@@ -23,8 +32,16 @@ const COLORS = /** @type {const} */ ({
 	FgGray: '\x1b[90m',
 });
 
+// Map log level to console method
+const consoleLevelMap = /** @type {const} */ ({
+	debug: console.debug,
+	info: console.info,
+	warn: console.warn,
+	error: console.error,
+});
+
 /**
- * Foreground colors
+ * Tint the string with a color
  * @param {typeof COLORS[keyof typeof COLORS]} color
  * @param {string} str
  */
@@ -53,6 +70,8 @@ function timestamp(format, date) {
 				.toLocaleString(undefined, {
 					hour: '2-digit',
 					minute: '2-digit',
+					second: '2-digit',
+					hour12: false,
 					day: '2-digit',
 					month: '2-digit',
 					year: 'numeric',
@@ -116,6 +135,40 @@ function parseEnv(env) {
 	return scopes;
 }
 
+/**
+ * Parse key-value pairs from arguments
+ * @param {any[]} args
+ */
+function parseArgs(args) {
+	/** @type {Record<string, any>} */
+	const parsedArgs = {};
+
+	if (args.length <= 1) {
+		return;
+	}
+
+	// every even index is a string, every odd index is an object
+	for (let i = 0; i < args.length; i += 2) {
+		parsedArgs[args[i]] = args[i + 1];
+	}
+
+	return parsedArgs;
+}
+
+/**
+ * Format arguments for std output
+ * @param {any} value
+ */
+function formatArgs(value) {
+	if (typeof value === 'object') {
+		return JSON.stringify(value, undefined, '  ');
+	}
+	if (typeof value === 'number') {
+		return tint(COLORS.FgYellow, value.toString());
+	}
+	return value;
+}
+
 class Logger {
 	/**
 	 * Log prefix
@@ -151,47 +204,44 @@ class Logger {
 
 	/**
 	 * Display output stream
+	 * @type {WritableStream<LogObject>}
 	 */
 	#stdout = new WritableStream({
 		write: async (obj) => {
-			let str;
-
 			if (this.#json) {
-				str = JSON.stringify(obj);
+				const str = JSON.stringify(obj);
+
+				if (IS_RUNTIME) {
+					const std = obj.level === 'error' ? process.stderr : process.stdout;
+					std.write(`${str}\n`);
+				} else if (IS_BROWSER) {
+					(consoleLevelMap[obj.level] || console.log)(str);
+				}
 			} else {
-				str = `${[
+				const str = `${[
 					this.#time && timestamp(this.#time, obj.ts),
 					obj.level && level(obj.level),
 					obj.location && tint(COLORS.FgGray, `<${obj.location}>`),
-					obj.prefix && tint(COLORS.FgGray, obj.prefix),
+					obj.prefix && tint(COLORS.FgGray, obj.prefix + ':'),
+					obj.message,
 				]
 					.filter(Boolean)
-					.join(' ')}${tint(COLORS.FgGray, ':')}`;
-			}
+					.join(' ')}`;
 
-			if (IS_RUNTIME) {
-				switch (obj.level) {
-					case 'error':
-						process.stderr.write(`${str} ${obj.msg}\n`);
-						break;
-					default:
-						process.stdout.write(`${str} ${obj.msg}\n`);
-						break;
-				}
-			} else if (IS_BROWSER) {
-				switch (obj.level) {
-					case 'debug':
-						console.debug(str, ...obj.args);
-						break;
-					case 'error':
-						console.error(str, ...obj.args);
-						break;
-					case 'warn':
-						console.warn(str, ...obj.args);
-						break;
-					default:
-						console.info(str, ...obj.args);
-						break;
+				if (IS_RUNTIME) {
+					const std = obj.level === 'error' ? process.stderr : process.stdout;
+
+					if (obj.parsedArgs) {
+						const args = [];
+						for (const key of Object.keys(obj.parsedArgs)) {
+							args.push(`${tint(COLORS.FgGray, key)}=${formatArgs(obj.parsedArgs[key])}`);
+						}
+						std.write(`${str} ${args.join(' ')}\n`);
+					} else {
+						std.write(`${str} ${obj.args.map(formatArgs).join(' ')}\n`);
+					}
+				} else if (IS_BROWSER) {
+					(consoleLevelMap[obj.level] || console.log)(str);
 				}
 			}
 		},
@@ -249,11 +299,11 @@ class Logger {
 	#output = new Set([this.#stdout]);
 
 	/**
-	 * Generic log
-	 * @param  {string} level
-	 * @param  {...any} args
+	 * Generic print method
+	 * @param  {'error' | 'warn' | 'info' | 'debug'} level
+	 * @param  {any[]} args
 	 */
-	#log = (level, ...args) => {
+	#print = (level, args) => {
 		if (
 			LOG_LEVELS.indexOf(level) >
 			LOG_LEVELS.indexOf(this.#logLevel[this.#prefix || '*'] || this.#logLevel['*'])
@@ -263,16 +313,18 @@ class Logger {
 		for (const stream of this.#output) {
 			const writer = stream.getWriter();
 
-			// TODO: args should be parsed as key values.
-
-			writer.write({
+			/** @type {LogObject} */
+			const obj = {
 				ts: new Date(),
 				level: level,
 				prefix: this.#prefix,
 				location: this.#trace && trace(),
-				msg: args.join(' '),
-				args: args,
-			});
+				message: args[0],
+				args: args.slice(1),
+				parsedArgs: parseArgs(args.slice(1)),
+			};
+
+			writer.write(obj);
 			writer.releaseLock();
 		}
 	};
@@ -282,7 +334,7 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	info = (...args) => {
-		this.#log('info', ...args);
+		this.#print('info', args);
 	};
 
 	/**
@@ -290,7 +342,7 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	error = (...args) => {
-		this.#log('error', ...args);
+		this.#print('error', args);
 	};
 
 	/**
@@ -298,7 +350,7 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	warn = (...args) => {
-		this.#log('warn', ...args);
+		this.#print('warn', args);
 	};
 
 	/**
@@ -306,7 +358,7 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	debug = (...args) => {
-		this.#log('debug', ...args);
+		this.#print('debug', args);
 	};
 }
 
