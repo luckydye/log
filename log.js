@@ -105,7 +105,7 @@ class Logger {
 	 * Log level
 	 * @type {string} - debug > error > warn > info
 	 */
-	#level = 'debug';
+	#level = 'error';
 
 	/**
 	 * Display output stream

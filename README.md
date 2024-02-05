@@ -8,6 +8,8 @@ A small (<2KB gzipped minified) JavaScript logging library inspired by charmbrac
 npm i @luckydye/log
 ```
 
+## Examples
+
 ### Log levels
 
 ```javascript
@@ -42,4 +44,53 @@ import logger from "npm:@luckydye/log";
 
 const log = logger().prefix("Deno");
 log.error("Test error");
+```
+
+## Environment variables
+
+### JS_LOG
+
+Set the log level. Default is `error`.
+
+## Configuration
+
+### Prefix
+
+```javascript
+const log = logger().prefix("Topic");
+```
+
+### Enable stack trace
+
+Disalbe last frame of stack trace in the output.
+
+```javascript
+const log = logger().trace();
+```
+
+### Set time format
+
+```javascript
+const log = logger().time("local" | "kitchen" | "iso" | "utc");
+
+// disable time
+const log = logger().time(false);
+```
+
+### Enable json output
+
+```javascript
+const log = logger().json();
+```
+
+### Enable json output
+
+```javascript
+const log = logger().json();
+```
+
+### Pipe log messages to arbitrary stream
+
+```javascript
+const log = logger().pipeTo(WriteableStream);
 ```
