@@ -129,6 +129,8 @@ class Logger {
 					.join(' ')}`;
 			}
 
+			// TODO: args should be parsed as key values.
+
 			if (IS_RUNTIME) {
 				switch (obj.level) {
 					case 'error':

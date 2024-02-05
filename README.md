@@ -83,12 +83,6 @@ const log = logger().time(false);
 const log = logger().json();
 ```
 
-### Enable json output
-
-```javascript
-const log = logger().json();
-```
-
 ### Pipe log messages to arbitrary stream
 
 ```javascript
