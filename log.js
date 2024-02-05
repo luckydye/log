@@ -65,16 +65,14 @@ function timestamp(format, date) {
  * Get last frame of stack trace
  */
 function trace() {
-	return new Error().stack
-		?.split('\n')[4]
-		.split(' ')
-		.pop()
-		?.split('/')
-		.reverse()
-		.slice(0, 2)
-		.reverse()
-		.join('/')
-		?.replace(/\(|\)/g, '');
+	const lines = new Error().stack?.split('\n').slice(1);
+	if (!lines) return;
+
+	const match = lines.slice(3)[0]?.match(/at (.+) \((.+)\)/);
+	if (match) {
+		const [, _location, file] = match;
+		return file.split('/').pop();
+	}
 }
 
 /**
@@ -232,6 +230,10 @@ class Logger {
 				this.#level = process.env.JS_LOG;
 			}
 		}
+
+		const namespace = trace();
+
+		this.info('Namespace', namespace);
 	}
 
 	#output = new Set([this.#stdout]);
