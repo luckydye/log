@@ -70,7 +70,7 @@ function trace() {
 
 	const match = lines.slice(3)[0]?.match(/at (.+) \((.+)\)/);
 	if (match) {
-		const [, _location, file] = match;
+		const [, , file] = match;
 		return file.split('/').pop();
 	}
 }
@@ -95,9 +95,27 @@ function level(lvl) {
 }
 
 /**
- * Logger builder
- * @param {string} prefix
+ * Parse log level from environment variable
+ * @param {typeof process.env} env
  */
+function parseEnv(env) {
+	/** @type {Record<string, string>} */
+	const scopes = {};
+
+	const levels = env.JS_LOG?.split(',').map((lvl) => lvl.split('='));
+	if (!levels) return scopes;
+
+	for (const arr of levels) {
+		if (arr.length === 1) {
+			scopes['*'] = arr[0];
+		} else {
+			scopes[arr[0]] = arr[1];
+		}
+	}
+
+	return scopes;
+}
+
 class Logger {
 	/**
 	 * Log prefix
@@ -124,18 +142,18 @@ class Logger {
 	#json = false;
 
 	/**
-	 * Log level
-	 * @type {string} - debug > error > warn > info
+	 * Log level by prefix scope or "*" for global scope
+	 * @type {Record<string, string>}
 	 */
-	#level = 'info';
+	#levels = {
+		'*': 'info',
+	};
 
 	/**
 	 * Display output stream
 	 */
 	#stdout = new WritableStream({
 		write: async (obj) => {
-			if (LOG_LEVELS.indexOf(obj.level) > LOG_LEVELS.indexOf(this.#level)) return;
-
 			let str;
 
 			if (this.#json) {
@@ -150,8 +168,6 @@ class Logger {
 					.filter(Boolean)
 					.join(' ')}${tint(COLORS.FgGray, ':')}`;
 			}
-
-			// TODO: args should be parsed as key values.
 
 			if (IS_RUNTIME) {
 				switch (obj.level) {
@@ -225,15 +241,9 @@ class Logger {
 	}
 
 	constructor() {
-		if (IS_RUNTIME) {
-			if (process.env.JS_LOG != undefined) {
-				this.#level = process.env.JS_LOG;
-			}
+		if (IS_RUNTIME && process.env.JS_LOG != undefined) {
+			this.#levels = parseEnv(process.env);
 		}
-
-		const namespace = trace();
-
-		this.info('Namespace', namespace);
 	}
 
 	#output = new Set([this.#stdout]);
@@ -244,8 +254,17 @@ class Logger {
 	 * @param  {...any} args
 	 */
 	#log = (level, ...args) => {
+		if (
+			LOG_LEVELS.indexOf(level) >
+			LOG_LEVELS.indexOf(this.#levels[this.#prefix || '*'] || this.#levels['*'])
+		)
+			return;
+
 		for (const stream of this.#output) {
 			const writer = stream.getWriter();
+
+			// TODO: args should be parsed as key values.
+
 			writer.write({
 				ts: new Date(),
 				level: level,
@@ -291,6 +310,9 @@ class Logger {
 	};
 }
 
+/**
+ * Logger builder
+ */
 export default function logger() {
 	return new Logger();
 }

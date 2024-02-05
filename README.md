@@ -50,7 +50,17 @@ log.error("Test error");
 
 ### JS_LOG
 
-Set the log level. Default is `error`.
+Set the log level. Default is `info`.
+
+#### Set log level for specific prefixes.
+
+```bash
+JS_LOG=[prefix][=][level][,...]
+```
+
+```bash
+JS_LOG = "error,Test=debug"
+```
 
 ## Configuration
 
