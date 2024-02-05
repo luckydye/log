@@ -178,6 +178,15 @@ class Logger {
 	}
 
 	/**
+	 * Set tmestamp format
+	 * @param {boolean | "local" | "kitchen" | "iso" | "utc"} format
+	 */
+	time(format) {
+		this.#time = format;
+		return this;
+	}
+
+	/**
 	 * Enable stack tracing
 	 */
 	trace() {
