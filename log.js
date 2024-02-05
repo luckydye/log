@@ -1,14 +1,36 @@
-// TODO: replace chalk with custom colorizer
 // TODO: make smaller
 // TODO: try to match rust logger namespacing
-
-import chalk from 'chalk';
 
 const IS_RUNTIME = typeof process !== 'undefined';
 const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
+// Log levels ordered by severity
 const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
+
+// ANSI color codes
+const COLORS = /** @type {const} */ ({
+	RESET: '\x1b[0m',
+
+	FgBlack: '\x1b[30m',
+	FgRed: '\x1b[31m',
+	FgGreen: '\x1b[32m',
+	FgYellow: '\x1b[33m',
+	FgBlue: '\x1b[34m',
+	FgMagenta: '\x1b[35m',
+	FgCyan: '\x1b[36m',
+	FgWhite: '\x1b[37m',
+	FgGray: '\x1b[90m',
+});
+
+/**
+ * Foreground colors
+ * @param {typeof COLORS[keyof typeof COLORS]} color
+ * @param {string} str
+ */
+function tint(color, str) {
+	return `${color}${str}${COLORS.RESET}`;
+}
 
 /**
  * Generate timestamp string
@@ -27,13 +49,15 @@ function timestamp(format, date) {
 		case 'utc':
 			return date.toUTCString();
 		default:
-			return date.toLocaleString(undefined, {
-				hour: '2-digit',
-				minute: '2-digit',
-				day: '2-digit',
-				month: '2-digit',
-				year: 'numeric',
-			});
+			return date
+				.toLocaleString(undefined, {
+					hour: '2-digit',
+					minute: '2-digit',
+					day: '2-digit',
+					month: '2-digit',
+					year: 'numeric',
+				})
+				.replace(',', '');
 	}
 }
 
@@ -60,13 +84,13 @@ function trace() {
 function level(lvl) {
 	switch (lvl) {
 		case 'info':
-			return chalk.cyan(lvl.toUpperCase());
+			return tint(COLORS.FgCyan, lvl.toUpperCase());
 		case 'warn':
-			return chalk.yellow(lvl.toUpperCase());
+			return tint(COLORS.FgYellow, lvl.toUpperCase());
 		case 'error':
-			return chalk.red(lvl.toUpperCase());
+			return tint(COLORS.FgRed, lvl.toUpperCase());
 		case 'debug':
-			return chalk.gray(lvl.toUpperCase());
+			return tint(COLORS.FgGray, lvl.toUpperCase());
 		default:
 			return lvl.toUpperCase();
 	}
@@ -122,11 +146,11 @@ class Logger {
 				str = `${[
 					this.#time && timestamp(this.#time, obj.ts),
 					obj.level && level(obj.level),
-					obj.location && chalk.gray(`<${obj.location}>`),
-					obj.prefix && chalk.gray(obj.prefix),
+					obj.location && tint(COLORS.FgGray, `<${obj.location}>`),
+					obj.prefix && tint(COLORS.FgGray, obj.prefix),
 				]
 					.filter(Boolean)
-					.join(' ')}${chalk.gray(':')}`;
+					.join(' ')}${tint(COLORS.FgGray, ':')}`;
 			}
 
 			// TODO: args should be parsed as key values.
