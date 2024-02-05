@@ -1,6 +1,6 @@
-const IS_RUNTIME = typeof process !== 'undefined';
 const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
+const IS_RUNTIME = !IS_BROWSER && typeof process !== 'undefined';
 
 /**
   * @typedef {{
