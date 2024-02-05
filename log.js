@@ -145,7 +145,7 @@ class Logger {
 	 * Log level by prefix scope or "*" for global scope
 	 * @type {Record<string, string>}
 	 */
-	#levels = {
+	#logLevel = {
 		'*': 'info',
 	};
 
@@ -242,7 +242,7 @@ class Logger {
 
 	constructor() {
 		if (IS_RUNTIME && process.env.JS_LOG != undefined) {
-			this.#levels = parseEnv(process.env);
+			this.#logLevel = parseEnv(process.env);
 		}
 	}
 
@@ -256,7 +256,7 @@ class Logger {
 	#log = (level, ...args) => {
 		if (
 			LOG_LEVELS.indexOf(level) >
-			LOG_LEVELS.indexOf(this.#levels[this.#prefix || '*'] || this.#levels['*'])
+			LOG_LEVELS.indexOf(this.#logLevel[this.#prefix || '*'] || this.#logLevel['*'])
 		)
 			return;
 
