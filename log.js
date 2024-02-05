@@ -126,7 +126,7 @@ class Logger {
 					obj.prefix && chalk.gray(obj.prefix),
 				]
 					.filter(Boolean)
-					.join(' ')}`;
+					.join(' ')}${chalk.gray(':')}`;
 			}
 
 			// TODO: args should be parsed as key values.
@@ -134,10 +134,10 @@ class Logger {
 			if (IS_RUNTIME) {
 				switch (obj.level) {
 					case 'error':
-						process.stderr.write(`${str}${chalk.gray(':')} ${obj.msg}` + '\n');
+						process.stderr.write(`${str} ${obj.msg}\n`);
 						break;
 					default:
-						process.stdout.write(`${str}${chalk.gray(':')} ${obj.msg}` + '\n');
+						process.stdout.write(`${str} ${obj.msg}\n`);
 						break;
 				}
 			} else if (IS_BROWSER) {
