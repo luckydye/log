@@ -67,16 +67,16 @@ import logger from "@luckydye/log";
 import { InfluxWriteStream } from '@luckydye/log/influx';
 
 const log = logger()
-			.prefix('Influx')
-			.pipeTo(
-				new InfluxWriteStream({
-					org: 'organisation',
-					bucket: 'bucket_name',
-					db: 'database_name',
-					url: 'https://influxdb.example.com',
-					token: 'ACCESS_TOKEN',
-				})
-			);
+  .prefix('Influx')
+  .pipeTo(
+    new InfluxWriteStream({
+      org: 'organisation',
+      bucket: 'bucket_name',
+      db: 'database_name',
+      url: 'https://influxdb.example.com',
+      token: 'ACCESS_TOKEN',
+    })
+  );
 
 // JS_LOG filtering applies here as well
 log.info('Hello, world!');
