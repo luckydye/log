@@ -62,13 +62,16 @@ const log = logger().prefix("Topic");
 
 ### Enable stack trace
 
-Disalbe last frame of stack trace in the output.
+Display last frame of stack trace in the output.
 
 ```javascript
 const log = logger().trace();
 ```
 
 ### Set time format
+
+Set the time format. Default is `local`.
+Set to `false` to disable time.
 
 ```javascript
 const log = logger().time("local" | "kitchen" | "iso" | "utc");
