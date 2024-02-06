@@ -22,7 +22,7 @@ log.error("This is an error!");
 ```
 
 ```bash
-02/05/2024 13:32:23 INFO <log.spec.ts:7:13> Test: Hello, world!
+02/06/2024 00:38:05 INFO <log.spec.ts:7:13> Test: Hello, world!!
 02/05/2024 13:32:53 ERROR <log.spec.ts:7:41> Test: This is an error!
 ```
 
@@ -33,9 +33,7 @@ log.warn('An Object', 'obj', { one: 2 });
 ```
 
 ```bash
-02/05/2024 16:01:51 WARN <log.spec.ts:15:61> An Object obj={
-  "one": 2
-}
+02/06/2024 00:38:05 WARN <log.spec.ts:17:64> Text here obj=Object{"one":2}
 ```
 
 ### JSON output
