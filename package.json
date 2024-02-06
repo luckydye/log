@@ -6,6 +6,7 @@
 	},
 	"description": "A tiny JavaScript logging library inspired by charmbracelet/log.",
 	"main": "log.js",
+	"types": "log.js",
 	"exports": {
     ".": {
       "import": "./log.js"
@@ -17,7 +18,8 @@
 	"type": "module",
 	"files": [
 		"log.js",
-		"influx.js"
+		"influx.js",
+		"tsconfig.json"
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^1.5.3",

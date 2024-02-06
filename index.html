@@ -4,15 +4,48 @@
     <script type="module">
         import logger from './log.js';
 
-        const log = logger().prefix('Test').trace();
+        window.it = (id, fn) => fn();
 
-        log.info('Hello, world!', "x", {
-            y: true
+        window.JS_LOG = "debug";
+
+        it('logging', () => {
+            const log = logger().prefix('Test').trace();
+
+            log.info('Hello, world!');
+            log.error('This is an error!');
         });
 
-        log.error('This is an error!');
-        log.warn('This is a warning!');
-        log.debug('A debug message!');
+        it('no prefix', () => {
+            const log = logger().trace();
+
+            log.warn('This has no prefix!');
+        });
+
+        it('js objects', () => {
+            const log = logger().prefix('Test');
+
+            log.debug('event', new Event('test'));
+        });
+
+        it('arguments', () => {
+            const log = logger().trace();
+
+            log.warn('Text here', 'one', 2, 'hello', 'world');
+
+            log.warn('Text here', 'obj', {one: 2});
+        });
+
+        it('invalid arguments', () => {
+            const log = logger().trace();
+
+            log.warn('Text here', 'and another text here');
+            log.warn('Text here', {one: 2});
+        });
+
+        it('json', () => {
+            const logJson = logger().prefix('Json').json().trace();
+            logJson.info('Hello, world!');
+        });
     </script>
 </body>
 

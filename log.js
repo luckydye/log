@@ -10,7 +10,6 @@ const IS_RUNTIME = !IS_BROWSER && typeof process !== 'undefined';
 			location?: string | false,
 			message?: string,
 			args: any[],
-			parsedArgs: Record<string, any> | undefined,
 		}} LogObject
 */
 
@@ -115,7 +114,7 @@ function level(lvl) {
 
 /**
  * Parse log level from environment variable
- * @param {typeof process.env} env
+ * @param {typeof process.env | Window} env
  */
 function parseEnv(env) {
 	/** @type {Record<string, string>} */
@@ -161,7 +160,12 @@ function parseArgs(args) {
  */
 function formatArgs(value) {
 	if (typeof value === 'object') {
-		return JSON.stringify(value, undefined, '  ');
+		const name = tint(COLORS.FgYellow, value.constructor.name);
+
+		if (Object.keys(value).length > 3) {
+			return `${name}${JSON.stringify(value, undefined, '  ')}`;
+		}
+		return `${name}${JSON.stringify(value)}`;
 	}
 	if (typeof value === 'number') {
 		return tint(COLORS.FgYellow, value.toString());
@@ -230,18 +234,19 @@ class Logger {
 
 				if (IS_RUNTIME) {
 					const std = obj.level === 'error' ? process.stderr : process.stdout;
+					const parsedArgs = parseArgs(obj.args);
 
-					if (obj.parsedArgs) {
+					if (parsedArgs) {
 						const args = [];
-						for (const key of Object.keys(obj.parsedArgs)) {
-							args.push(`${tint(COLORS.FgGray, key)}=${formatArgs(obj.parsedArgs[key])}`);
+						for (const key of Object.keys(parsedArgs)) {
+							args.push(`${tint(COLORS.FgGray, key)}=${formatArgs(parsedArgs[key])}`);
 						}
 						std.write(`${str} ${args.join(' ')}\n`);
 					} else {
 						std.write(`${str} ${obj.args.map(formatArgs).join(' ')}\n`);
 					}
 				} else if (IS_BROWSER) {
-					(consoleLevelMap[obj.level] || console.log)(str);
+					(consoleLevelMap[obj.level] || console.log)(str, ...obj.args);
 				}
 			}
 		},
@@ -294,6 +299,9 @@ class Logger {
 		if (IS_RUNTIME && process.env.JS_LOG != undefined) {
 			this.#logLevel = parseEnv(process.env);
 		}
+		if (IS_BROWSER && window.JS_LOG != undefined) {
+			this.#logLevel = parseEnv(window);
+		}
 	}
 
 	#output = new Set([this.#stdout]);
@@ -321,7 +329,6 @@ class Logger {
 				location: this.#trace && trace(),
 				message: args[0],
 				args: args.slice(1),
-				parsedArgs: parseArgs(args.slice(1)),
 			};
 
 			writer.write(obj);

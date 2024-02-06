@@ -1,4 +1,4 @@
-import logger from './log';
+import logger from './log.js';
 import { InfluxWriteStream } from './influx';
 import { it, describe } from 'bun:test';
 
@@ -14,6 +14,12 @@ describe('log', () => {
 		const log = logger().trace();
 
 		log.warn('This has no prefix!');
+	});
+
+	it('js objects', () => {
+		const log = logger().prefix('Test');
+
+		log.info('event', new Event('test'));
 	});
 
 	it('arguments', () => {
