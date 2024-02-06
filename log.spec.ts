@@ -11,7 +11,7 @@ describe('log', () => {
 	});
 
 	it('no prefix', () => {
-		const log = logger().trace();
+		const log = logger();
 
 		log.warn('This has no prefix!');
 	});
@@ -20,6 +20,13 @@ describe('log', () => {
 		const log = logger().prefix('Test');
 
 		log.info('event', new Event('test'));
+	});
+
+	it('boolean', () => {
+		const log = logger().prefix('Test');
+
+		log.info('bool', true);
+		log.info('bool', 'value', false);
 	});
 
 	it('arguments', () => {

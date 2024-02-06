@@ -165,10 +165,16 @@ function formatArgs(value) {
 		if (Object.keys(value).length > 3) {
 			return `${name}${JSON.stringify(value, undefined, '  ')}`;
 		}
-		return `${name}${JSON.stringify(value)}`;
+		return `${name}${tint(COLORS.FgGray, JSON.stringify(value))}`;
 	}
 	if (typeof value === 'number') {
 		return tint(COLORS.FgYellow, value.toString());
+	}
+	if (typeof value === 'boolean' && value === true) {
+		return tint(COLORS.FgGreen, value.toString());
+	}
+	if (typeof value === 'boolean' && value === false) {
+		return tint(COLORS.FgRed, value.toString());
 	}
 	return value;
 }

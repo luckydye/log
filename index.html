@@ -27,6 +27,12 @@
             log.debug('event', new Event('test'));
         });
 
+        it('boolean', () => {
+            const log = logger().prefix('Test');
+
+            log.info('bool', true);
+        });
+
         it('arguments', () => {
             const log = logger().trace();
 
