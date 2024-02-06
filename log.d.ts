@@ -1,1 +1,1 @@
-declare module 'log';
+declare module '@luckydye/log';
