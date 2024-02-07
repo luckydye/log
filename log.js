@@ -89,8 +89,16 @@ function trace() {
 	const match = lines.slice(3)[0]?.match(/at (.+) \((.+)\)/);
 	if (match) {
 		const [, , file] = match;
-		return file.split('/').pop();
+		return file?.split('/').pop();
 	}
+
+	const match2 = lines.slice(3)[0]?.match(/at (.+)/);
+	if (match2) {
+		const [file] = match2;
+		return file?.split('/').pop()?.split('?')[0];
+	}
+
+	console.error('logging error:', 'failed to parse stack trace');
 }
 
 /**
