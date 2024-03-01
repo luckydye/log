@@ -1,6 +1,6 @@
 {
 	"name": "@luckydye/log",
-	"version": "0.6.1",
+	"version": "0.7.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -23,7 +23,7 @@
 		"influx.d.ts"
 	],
 	"devDependencies": {
-    "@types/node": "^20.11.16",
-    "@biomejs/biome": "^1.5.3"
+		"@biomejs/biome": "^1.5.3",
+		"@types/node": "^20.11.16"
 	}
 }

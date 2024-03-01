@@ -29,7 +29,7 @@ export class InfluxWriteStream extends WritableStream {
 			}
 		).then(async (res) => {
 			if (!res.ok) {
-				throw new Error('Failed to write to InfluxDB: ' + (await res.text()));
+				throw new Error(`Failed to write to InfluxDB: ${await res.text()}`);
 			}
 		});
 		this.batch.length = 0;
@@ -50,7 +50,7 @@ export class InfluxWriteStream extends WritableStream {
 
 				this.batch.push(body);
 
-				if (this.timer != undefined) {
+				if (this.timer !== undefined) {
 					clearTimeout(this.timer);
 				}
 

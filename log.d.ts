@@ -2,6 +2,7 @@
  * Logger builder
  */
 export default function logger(): Logger;
+export type Env = NodeJS.ProcessEnv;
 export type LogObject = {
     ts: Date;
     level: 'error' | 'warn' | 'info' | 'debug';
@@ -11,6 +12,9 @@ export type LogObject = {
     args: any[];
 };
 declare class Logger {
+    constructor(stdio?: NodeJS.WriteStream & {
+        fd: 2;
+    });
     /**
      * Set prefix
      * @param {string} prefix
@@ -35,6 +39,12 @@ declare class Logger {
      */
     pipeTo(stream: WritableStream): this;
     /**
+     * Return formatted log string
+     * @param {'error' | 'warn' | 'info' | 'debug'} level
+     * @param {any[]} args
+     */
+    sprint: (level: 'error' | 'warn' | 'info' | 'debug', ...args: any[]) => string;
+    /**
      * Log info
      * @param  {...any} args
      */
@@ -56,9 +66,4 @@ declare class Logger {
     debug: (...args: any[]) => void;
     #private;
 }
-/**
- * Format log level
- * @param {string} lvl
- */
-declare function level(lvl: string): string;
 export {};

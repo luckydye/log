@@ -1,68 +1,83 @@
-import logger from './log.js';
+import { expect, test } from 'bun:test';
 import { InfluxWriteStream } from './influx';
-import { it, describe } from 'bun:test';
+import logger from './log.js';
 
-describe('log', () => {
-	it('logging', () => {
-		const log = logger().prefix('Test').trace();
+test('logging', () => {
+	const log = logger().prefix('Test').trace();
 
-		log.info('Hello, world!');
-		log.error('This is an error!');
-	});
+	log.info('Hello, world!');
+	log.error('This is an error!');
+});
 
-	it('no prefix', () => {
-		const log = logger();
+test('no prefix', () => {
+	const log = logger();
 
-		log.warn('This has no prefix!');
-	});
+	log.warn('This has no prefix!');
+});
 
-	it('js objects', () => {
-		const log = logger().prefix('Test');
+test('js objects', () => {
+	const log = logger().prefix('Test');
 
-		log.info('event', new Event('test'));
-	});
+	log.info('event', new Event('test'));
+});
 
-	it('boolean', () => {
-		const log = logger().prefix('Test');
+test('boolean', () => {
+	const log = logger().prefix('Test');
 
-		log.info('bool', true);
-		log.info('bool', 'value', false);
-	});
+	log.info('bool', true);
+	log.info('bool', 'value', false);
+});
 
-	it('arguments', () => {
-		const log = logger().trace();
+test('arguments', () => {
+	const log = logger().trace();
 
-		log.warn('Text here', 'one', 2, 'hello', 'world');
+	log.warn('Text here', 'one', 2, 'hello', 'world');
 
-		log.warn('Text here', 'obj', { one: 2 });
-	});
+	log.warn('Text here', 'obj', { one: 2 });
+});
 
-	it('invalid arguments', () => {
-		const log = logger().trace();
+test('invalid arguments', () => {
+	const log = logger().trace();
 
-		log.warn('Text here', 'and another text here');
-		log.warn('Text here', { one: 2 });
-	});
+	log.warn('Text here', 'and another text here');
+	log.warn('Text here', { one: 2 });
+});
 
-	it('json', () => {
-		const logJson = logger().prefix('Json').json().trace();
-		logJson.info('Hello, world!');
-	});
+test('json', () => {
+	const logJson = logger().prefix('Test').json().trace();
+	logJson.info('Hello, world!');
+});
 
-	it('influx', () => {
-		const log = logger()
-			.prefix('Influx')
-			.time(false)
-			.pipeTo(
-				new InfluxWriteStream({
-					org: 'test',
-					bucket: 'test',
-					db: 'test',
-					url: 'https://test',
-					token: 'test',
-				})
-			);
+test('influx', () => {
+	const log = logger()
+		.prefix('Influx')
+		.time(false)
+		.pipeTo(
+			new InfluxWriteStream({
+				org: 'test',
+				bucket: 'test',
+				db: 'test',
+				url: 'https://test',
+				token: 'test',
+			})
+		);
 
-		log.info('Hello, world!');
-	});
+	log.info('Hello, world!');
+});
+
+test('log format', () => {
+	const log = logger().trace().time(false);
+
+	const str = log.sprint('error', 'Hello, world!');
+
+	const expected =
+		'\u001B[31mERROR\u001B[0m \u001B[90m<log.spec.ts:39:47>\u001B[0m Hello, world!';
+
+	expect(str).toBe(expected);
+});
+
+test('log errors', () => {
+	const log = logger().trace();
+
+	log.error('testing', 'err', new SyntaxError('Test error'));
 });

@@ -16,6 +16,5 @@
 
     "types": ["@types/node"]
   },
-  "include": ["env.d.ts"],
   "files": ["log.js", "influx.js"]
 }

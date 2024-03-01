@@ -5,4 +5,4 @@ bun = "latest"
 run = "clear && bun test"
 
 [env]
-JS_LOG = "warn,Test=debug,Json=debug"
+JS_LOG = "debug,Warn=warn"
