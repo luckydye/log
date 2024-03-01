@@ -2,6 +2,11 @@ const IS_BROWSER =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
 const IS_RUNTIME = !IS_BROWSER && typeof process !== 'undefined';
 
+const stderr = IS_RUNTIME ? process.stderr : undefined;
+
+/** @type {any} */
+const global = globalThis;
+
 /**
  * @typedef {NodeJS.ProcessEnv} Env
  */
@@ -126,13 +131,12 @@ function flevel(lvl) {
 
 /**
  * Parse log level from environment variable
- * @param {Env} env
+ * @param {string | undefined} logLevel
  */
-function parseEnv(env) {
+function parseLogLevel(logLevel) {
 	/** @type {Record<string, string>} */
 	const scopes = {};
 
-	const logLevel = env.JS_LOG;
 	const levels = logLevel?.split(',').map((lvl) => lvl.split('='));
 	if (!levels) return scopes;
 
@@ -172,10 +176,15 @@ function parseKeyValueArgs(args) {
  * @param {any} value
  */
 function formatArgs(value) {
+	if (value instanceof Event) {
+		return `${tint(COLORS.FgYellow, value.constructor.name)}${tint(
+			COLORS.FgGray,
+			`{"${value.type}"}`
+		)}`;
+	}
 	if (value instanceof Error) {
 		return `${value.message}\n${value.stack ? tint(COLORS.FgGray, value.stack) : ''}\n`;
 	}
-
 	if (typeof value === 'object') {
 		const name = tint(COLORS.FgYellow, value.constructor.name);
 
@@ -232,7 +241,7 @@ class Logger {
 	/**
 	 * stdout or stderr
 	 */
-	#stdio = process.stderr;
+	#stdio = stderr;
 
 	/**
 	 * Writeable streams to pipe logs to
@@ -274,13 +283,11 @@ class Logger {
 		return this;
 	}
 
-	constructor(stdio = process.stderr) {
+	constructor(stdio = stderr) {
 		this.#stdio = stdio;
-
-		const env = process.env || globalThis;
-		if (env.JS_LOG !== undefined) {
-			this.#logLevel = parseEnv(env);
-		}
+		this.#logLevel = parseLogLevel(
+			IS_RUNTIME ? process.env.JS_LOG || global.JS_LOG : global.JS_LOG
+		);
 	}
 
 	/**
@@ -304,18 +311,35 @@ class Logger {
 	 * @param {LogObject} obj
 	 */
 	#log = (obj) => {
-		if (!this.#checkLevel(obj.level)) return;
+		if (!this.checkLevel(obj.level)) return;
 
 		if (IS_RUNTIME) {
-			this.#stdio.write(`${this.#print(obj)}\n`);
+			this.#stdio?.write(`${this.#print(obj)}\n`);
 		}
 
 		if (IS_BROWSER) {
+			const write = consoleLevelMap[obj.level] || console.log;
+
 			if (this.#json) {
-				(consoleLevelMap[obj.level] || console.log)(JSON.stringify(obj));
+				write(obj);
 			} else {
 				const str = this.#preabmle(obj);
-				(consoleLevelMap[obj.level] || console.log)(str, ...obj.args);
+				const parsedArgs = parseKeyValueArgs(obj.args);
+
+				if (parsedArgs) {
+					/** @type {any[]} */
+					const args = [];
+					let fstr = '';
+
+					for (const key of Object.keys(parsedArgs)) {
+						fstr += ` ${tint(COLORS.FgGray, key)}=%o`;
+						args.push(parsedArgs[key]);
+					}
+
+					write(`%s${fstr}`, str, ...args);
+				} else {
+					write(str, ...obj.args);
+				}
 			}
 		}
 
@@ -328,10 +352,11 @@ class Logger {
 
 	/**
 	 * Check log level
+	 * @private
 	 * @param {string} level
 	 * @returns {boolean}
 	 */
-	#checkLevel = (level) => {
+	checkLevel = (level) => {
 		if (
 			LOG_LEVELS.indexOf(level) >
 			LOG_LEVELS.indexOf(this.#logLevel[this.#prefix || '*'] || this.#logLevel['*'])

@@ -24,6 +24,10 @@ log.error("This is an error!");
 ```bash
 02/06/2024 00:38:05 INFO <log.spec.ts:7:13> Test: Hello, world!!
 02/05/2024 13:32:53 ERROR <log.spec.ts:7:41> Test: This is an error!
+03/01/2024 22:41:53 ERROR <log.spec.ts:43:25> testing err=Test error
+SyntaxError: Test error
+    at <parse> (:0)
+    at <anonymous> (/Users/tihav/source/log/log.spec.ts:82:1)
 ```
 
 ### Formatted arguments

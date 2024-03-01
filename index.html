@@ -1,58 +1,84 @@
 <html>
+    <body>
+        <script type="module">
+            import logger from "./log.js";
 
-<body>
-    <script type="module">
-        import logger from './log.js';
+            window.test = (id, fn) => fn();
+            window.expect = (a) => {
+              return {
+                toBe: (b) => {
+                  if (a !== b) {
+                    throw new Error(`${a} is not equal to ${b}`);
+                  } else {
+                    console.log("Test passed!");
+                  }
+                },
+              }
+            };
 
-        window.it = (id, fn) => fn();
+            window.JS_LOG = "debug";
 
-        window.JS_LOG = "debug";
+            test("logging", () => {
+                const log = logger().prefix("Test").trace();
 
-        it('logging', () => {
-            const log = logger().prefix('Test').trace();
+                log.info("Hello, world!");
+                log.error("This is an error!");
+            });
 
-            log.info('Hello, world!');
-            log.error('This is an error!');
-        });
+            test("no prefix", () => {
+                const log = logger();
 
-        it('no prefix', () => {
-            const log = logger().trace();
+                log.warn("This has no prefix!");
+            });
 
-            log.warn('This has no prefix!');
-        });
+            test("js objects", () => {
+                const log = logger().prefix("Test");
 
-        it('js objects', () => {
-            const log = logger().prefix('Test');
+                log.info("event", "click", new Event("test"));
+            });
 
-            log.debug('event', new Event('test'));
-        });
+            test("boolean", () => {
+                const log = logger().prefix("Test");
 
-        it('boolean', () => {
-            const log = logger().prefix('Test');
+                log.info("bool", true);
+                log.info("bool", "value", false);
+            });
 
-            log.info('bool', true);
-        });
+            test("arguments", () => {
+                const log = logger().trace();
 
-        it('arguments', () => {
-            const log = logger().trace();
+                log.warn("Text here", "one", 2, "hello", "world");
 
-            log.warn('Text here', 'one', 2, 'hello', 'world');
+                log.warn("Text here", "obj", { one: 2 });
+            });
 
-            log.warn('Text here', 'obj', {one: 2});
-        });
+            test("invalid arguments", () => {
+                const log = logger().trace();
 
-        it('invalid arguments', () => {
-            const log = logger().trace();
+                log.warn("Text here", "and another text here");
+                log.warn("Text here", { one: 2 });
+            });
 
-            log.warn('Text here', 'and another text here');
-            log.warn('Text here', {one: 2});
-        });
+            test("json", () => {
+                const logJson = logger().prefix("Test").json().trace();
+                logJson.info("Hello, world!");
+            });
 
-        it('json', () => {
-            const logJson = logger().prefix('Json').json().trace();
-            logJson.info('Hello, world!');
-        });
-    </script>
-</body>
+            test("log errors", () => {
+                const log = logger().trace();
 
+                log.error("testing", "err", new SyntaxError("Test error"));
+            });
+
+            test("log level globalThis", () => {
+                globalThis.JS_LOG = "error";
+
+                const log = logger().trace();
+
+                const print = log.checkLevel("info");
+
+                expect(print).toBe(false);
+            });
+        </script>
+    </body>
 </html>

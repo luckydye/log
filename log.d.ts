@@ -12,9 +12,9 @@ export type LogObject = {
     args: any[];
 };
 declare class Logger {
-    constructor(stdio?: NodeJS.WriteStream & {
+    constructor(stdio?: (NodeJS.WriteStream & {
         fd: 2;
-    });
+    }) | undefined);
     /**
      * Set prefix
      * @param {string} prefix
@@ -33,6 +33,13 @@ declare class Logger {
      * Enable stack tracing
      */
     json(): this;
+    /**
+     * Check log level
+     * @private
+     * @param {string} level
+     * @returns {boolean}
+     */
+    private checkLevel;
     /**
      * Pipe logs to stream
      * @param {WritableStream} stream

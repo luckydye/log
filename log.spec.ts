@@ -81,3 +81,24 @@ test('log errors', () => {
 
 	log.error('testing', 'err', new SyntaxError('Test error'));
 });
+
+test('log level env', () => {
+	process.env.JS_LOG = 'error';
+
+	const log = logger().trace();
+
+	const print = log.checkLevel('info');
+
+	expect(print).toBe(false);
+});
+
+test('log level globalThis', () => {
+	process.env.JS_LOG = undefined;
+	globalThis.JS_LOG = 'error';
+
+	const log = logger().trace();
+
+	const print = log.checkLevel('info');
+
+	expect(print).toBe(false);
+});
