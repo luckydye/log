@@ -3,6 +3,3 @@ bun = "latest"
 
 [tasks.test]
 run = "clear && bun test"
-
-[env]
-JS_LOG = "debug,Warn=warn"

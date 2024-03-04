@@ -2,6 +2,12 @@
  * Logger builder
  */
 export default function logger(): Logger;
+/**
+ * Creates a temporary logger and calls its assert method.
+ * @param {any} condition
+ * @param {string} [message]
+ */
+export function assert(condition: any, message?: string | undefined): void;
 export type Env = NodeJS.ProcessEnv;
 export type LogObject = {
     ts: Date;
@@ -71,6 +77,12 @@ declare class Logger {
      * @param  {...any} args
      */
     debug: (...args: any[]) => void;
+    /**
+     * An assertion. Throws an error if condition is false.
+     * @param {any} condition
+     * @param {string} [message]
+     */
+    assert: (condition: any, message?: string | undefined) => void;
     #private;
 }
 export {};

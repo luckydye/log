@@ -1,6 +1,11 @@
-import { expect, test } from 'bun:test';
+import { afterEach, expect, test } from 'bun:test';
 import { InfluxWriteStream } from './influx';
-import logger from './log.js';
+import logger, { assert } from './log.js';
+
+afterEach(() => {
+	process.env.JS_LOG = 'debug';
+	globalThis.JS_LOG = process.env.JS_LOG;
+});
 
 test('logging', () => {
 	const log = logger().prefix('Test').trace();
@@ -71,7 +76,7 @@ test('log format', () => {
 	const str = log.sprint('error', 'Hello, world!');
 
 	const expected =
-		'\u001B[31mERROR\u001B[0m \u001B[90m<log.spec.ts:39:47>\u001B[0m Hello, world!';
+		'\u001B[31mERROR\u001B[0m \u001B[90m<log.spec.ts:47:47>\u001B[0m Hello, world!';
 
 	expect(str).toBe(expected);
 });
@@ -87,6 +92,7 @@ test('log level env', () => {
 
 	const log = logger().trace();
 
+	// @ts-ignore
 	const print = log.checkLevel('info');
 
 	expect(print).toBe(false);
@@ -98,7 +104,18 @@ test('log level globalThis', () => {
 
 	const log = logger().trace();
 
+	// @ts-ignore
 	const print = log.checkLevel('info');
 
 	expect(print).toBe(false);
+});
+
+test('assertion', () => {
+	try {
+		assert(false, "This shouldn't be true");
+	} catch (err) {
+		return;
+	}
+
+	throw new Error('Assertion failed to throw');
 });

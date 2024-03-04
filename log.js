@@ -458,6 +458,24 @@ class Logger {
 	debug = (...args) => {
 		this.#log(this.#parseArgs('debug', args));
 	};
+
+	/**
+	 * An assertion. Throws an error if condition is false.
+	 * @param {any} condition
+	 * @param {string} [message]
+	 */
+	assert = (condition, message) => {
+		if (
+			condition === false ||
+			condition === undefined ||
+			condition === null ||
+			condition === ''
+		) {
+			const err = new AssertionError(message);
+			this.#log(this.#parseArgs('error', ['', 'assert', err]));
+			throw err;
+		}
+	};
 }
 
 /**
@@ -465,4 +483,24 @@ class Logger {
  */
 export default function logger() {
 	return new Logger();
+}
+
+class AssertionError extends Error {}
+
+/**
+ * Creates a temporary logger and calls its assert method.
+ * @param {any} condition
+ * @param {string} [message]
+ */
+export function assert(condition, message) {
+	if (
+		condition === false ||
+		condition === undefined ||
+		condition === null ||
+		condition === ''
+	) {
+		const err = new AssertionError(message);
+		logger().error('', 'assert', err);
+		throw err;
+	}
 }

@@ -1,16 +1,19 @@
 <html>
     <body>
         <script type="module">
-            import logger from "./log.js";
+            import logger, { assert } from "./log.js";
 
-            window.test = (id, fn) => fn();
+            window.test = (id, fn) => {
+              fn()
+              console.log("✔️", id);
+            };
             window.expect = (a) => {
               return {
                 toBe: (b) => {
                   if (a !== b) {
                     throw new Error(`${a} is not equal to ${b}`);
                   } else {
-                    console.log("Test passed!");
+                    console.log("✔️", "Test passed!");
                   }
                 },
               }
@@ -78,6 +81,16 @@
                 const print = log.checkLevel("info");
 
                 expect(print).toBe(false);
+            });
+
+            test('assertion', () => {
+             	try {
+              		assert(false, "This shouldn't be true");
+             	} catch (err) {
+              		return;
+             	}
+
+             	throw new Error('Assertion failed to throw');
             });
         </script>
     </body>
