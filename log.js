@@ -185,7 +185,7 @@ function formatArgs(value) {
 	if (value instanceof Error) {
 		return `${value.message}\n${value.stack ? tint(COLORS.FgGray, value.stack) : ''}\n`;
 	}
-	if (typeof value === 'object') {
+	if (typeof value === 'object' && value !== null) {
 		const name = tint(COLORS.FgYellow, value.constructor.name);
 
 		if (Object.keys(value).length > 3) {
