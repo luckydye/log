@@ -1,6 +1,7 @@
 {
 	"name": "@luckydye/log",
 	"version": "0.7.1",
+	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
 	},
