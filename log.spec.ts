@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'bun:test';
 import { InfluxWriteStream } from './influx';
-import logger, { assert } from './log.js';
+import logger, { assert, todo } from './log.js';
 
 afterEach(() => {
 	process.env.JS_LOG = 'debug';
@@ -113,6 +113,16 @@ test('log level globalThis', () => {
 test('assertion', () => {
 	try {
 		assert(false, "This shouldn't be true");
+	} catch (err) {
+		return;
+	}
+
+	throw new Error('Assertion failed to throw');
+});
+
+test('todo', () => {
+	try {
+		todo('There is a TODO here');
 	} catch (err) {
 		return;
 	}

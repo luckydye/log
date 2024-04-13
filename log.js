@@ -500,7 +500,17 @@ export function assert(condition, message) {
 		condition === ''
 	) {
 		const err = new AssertionError(message);
-		logger().error('', 'assert', err);
+		logger().trace().error('', 'assert', err);
 		throw err;
 	}
+}
+
+/**
+ * Creates a temporary logger and calls its assert method with a TODO message.
+ * @param {string} message
+ */
+export function todo(message) {
+	const err = new AssertionError(message);
+	logger().trace().error('', 'TODO', err);
+	throw err;
 }

@@ -8,6 +8,11 @@ export default function logger(): Logger;
  * @param {string} [message]
  */
 export function assert(condition: any, message?: string | undefined): void;
+/**
+ * Creates a temporary logger and calls its assert method with a TODO message.
+ * @param {string} message
+ */
+export function todo(message: string): void;
 export type Env = NodeJS.ProcessEnv;
 export type LogObject = {
     ts: Date;

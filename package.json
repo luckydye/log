@@ -1,31 +1,31 @@
 {
-	"name": "@luckydye/log",
-	"version": "0.7.1",
-	"license": "MIT",
-	"publishConfig": {
-		"access": "public"
-	},
-	"description": "A tiny JavaScript logging library inspired by charmbracelet/log.",
-	"main": "./log.js",
-	"exports": {
-		".": {
-			"import": "./log.js"
-		},
-		"./influx": {
-			"import": "./influx.js"
-		}
-	},
-	"type": "module",
-	"files": [
-		"log.js",
-		"log.d.ts",
-		"log.spec.ts",
-		"influx.js",
-		"influx.d.ts"
-	],
-	"devDependencies": {
-		"@biomejs/biome": "^1.5.3",
-		"@types/node": "^20.11.16",
-		"bun-types": "^1.0.30"
-	}
+  "name": "@luckydye/log",
+  "version": "0.7.2",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "A tiny JavaScript logging library inspired by charmbracelet/log.",
+  "main": "./log.js",
+  "exports": {
+    ".": {
+      "import": "./log.js"
+    },
+    "./influx": {
+      "import": "./influx.js"
+    }
+  },
+  "type": "module",
+  "files": [
+    "log.js",
+    "log.d.ts",
+    "log.spec.ts",
+    "influx.js",
+    "influx.d.ts"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.3",
+    "@types/node": "^20.11.16",
+    "bun-types": "^1.0.30"
+  }
 }
