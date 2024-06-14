@@ -1,6 +1,6 @@
 const IS_BROWSER =
-	typeof window !== 'undefined' && typeof window.document !== 'undefined';
-const IS_RUNTIME = !IS_BROWSER && typeof process !== 'undefined';
+  typeof window !== "undefined" && typeof window.document !== "undefined";
+const IS_RUNTIME = !IS_BROWSER && typeof process !== "undefined";
 
 const stderr = IS_RUNTIME ? process.stderr : undefined;
 
@@ -23,29 +23,29 @@ const global = globalThis;
 */
 
 // Log levels ordered by severity
-const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
+const LOG_LEVELS = ["error", "warn", "info", "debug"];
 
 // ANSI color codes
 const COLORS = /** @type {const} */ ({
-	RESET: '\x1b[0m',
+  RESET: "\x1b[0m",
 
-	FgBlack: '\x1b[30m',
-	FgRed: '\x1b[31m',
-	FgGreen: '\x1b[32m',
-	FgYellow: '\x1b[33m',
-	FgBlue: '\x1b[34m',
-	FgMagenta: '\x1b[35m',
-	FgCyan: '\x1b[36m',
-	FgWhite: '\x1b[37m',
-	FgGray: '\x1b[90m',
+  FgBlack: "\x1b[30m",
+  FgRed: "\x1b[31m",
+  FgGreen: "\x1b[32m",
+  FgYellow: "\x1b[33m",
+  FgBlue: "\x1b[34m",
+  FgMagenta: "\x1b[35m",
+  FgCyan: "\x1b[36m",
+  FgWhite: "\x1b[37m",
+  FgGray: "\x1b[90m",
 });
 
 // Map log level to console method
 const consoleLevelMap = /** @type {const} */ ({
-	debug: console.debug,
-	info: console.info,
-	warn: console.warn,
-	error: console.error,
+  debug: console.debug,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
 });
 
 /**
@@ -54,7 +54,7 @@ const consoleLevelMap = /** @type {const} */ ({
  * @param {string} str
  */
 function tint(color, str) {
-	return `${color}${str}${COLORS.RESET}`;
+  return `${color}${str}${COLORS.RESET}`;
 }
 
 /**
@@ -63,51 +63,50 @@ function tint(color, str) {
  * @param {Date} date
  */
 function timestamp(format, date) {
-	switch (format) {
-		case 'kitchen':
-			return date.toLocaleTimeString(undefined, {
-				hour: '2-digit',
-				minute: '2-digit',
-			});
-		case 'iso':
-			return date.toISOString();
-		case 'utc':
-			return date.toUTCString();
-		default:
-			return date
-				.toLocaleString(undefined, {
-					hour: '2-digit',
-					minute: '2-digit',
-					second: '2-digit',
-					hour12: false,
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric',
-				})
-				.replace(',', '');
-	}
+  switch (format) {
+    case "kitchen":
+      return date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    case "iso":
+      return date.toISOString();
+    case "utc":
+      return date.toUTCString();
+    default:
+      return date
+        .toLocaleString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+        .replace(",", "");
+  }
 }
 
 /**
  * Get last frame of stack trace
  */
 function trace() {
-	const lines = new Error().stack?.split('\n').slice(1);
-	if (!lines) return;
+  const lines = new Error().stack?.split("\n").slice(1);
+  if (!lines) return;
 
-	const match = lines.slice(3)[0]?.match(/at (.+) \((.+)\)/);
-	if (match) {
-		const [, , file] = match;
-		return file?.split('/').pop();
-	}
+  const match = lines.slice(3)[0]?.match(/at (.+) \((.+)\)/);
+  if (match) {
+    const [, , file] = match;
+    return file?.split("/").pop();
+  }
 
-	const match2 = lines.slice(3)[0]?.match(/at (.+)/);
-	if (match2) {
-		const [file] = match2;
-		return file?.split('/').pop()?.split('?')[0];
-	}
-
-	console.error('logging error:', 'failed to parse stack trace');
+  const match2 = lines.slice(3)[0]?.match(/at (.+)/);
+  if (match2) {
+    const [file] = match2;
+    return file?.split("/").pop()?.split("?")[0];
+  }
+  // console.error('logging error:', 'failed to parse stack trace');
 }
 
 /**
@@ -115,18 +114,18 @@ function trace() {
  * @param {string} lvl
  */
 function flevel(lvl) {
-	switch (lvl) {
-		case 'info':
-			return tint(COLORS.FgCyan, lvl.toUpperCase());
-		case 'warn':
-			return tint(COLORS.FgYellow, lvl.toUpperCase());
-		case 'error':
-			return tint(COLORS.FgRed, lvl.toUpperCase());
-		case 'debug':
-			return tint(COLORS.FgGray, lvl.toUpperCase());
-		default:
-			return lvl.toUpperCase();
-	}
+  switch (lvl) {
+    case "info":
+      return tint(COLORS.FgCyan, lvl.toUpperCase());
+    case "warn":
+      return tint(COLORS.FgYellow, lvl.toUpperCase());
+    case "error":
+      return tint(COLORS.FgRed, lvl.toUpperCase());
+    case "debug":
+      return tint(COLORS.FgGray, lvl.toUpperCase());
+    default:
+      return lvl.toUpperCase();
+  }
 }
 
 /**
@@ -134,21 +133,21 @@ function flevel(lvl) {
  * @param {string | undefined} logLevel
  */
 function parseLogLevel(logLevel) {
-	/** @type {Record<string, string>} */
-	const scopes = {};
+  /** @type {Record<string, string>} */
+  const scopes = {};
 
-	const levels = logLevel?.split(',').map((lvl) => lvl.split('='));
-	if (!levels) return scopes;
+  const levels = logLevel?.split(",").map((lvl) => lvl.split("="));
+  if (!levels) return scopes;
 
-	for (const arr of levels) {
-		if (arr.length === 1) {
-			scopes['*'] = arr[0];
-		} else {
-			scopes[arr[0]] = arr[1];
-		}
-	}
+  for (const arr of levels) {
+    if (arr.length === 1) {
+      scopes["*"] = arr[0];
+    } else {
+      scopes[arr[0]] = arr[1];
+    }
+  }
 
-	return scopes;
+  return scopes;
 }
 
 /**
@@ -156,19 +155,19 @@ function parseLogLevel(logLevel) {
  * @param {any[]} args
  */
 function parseKeyValueArgs(args) {
-	/** @type {Record<string, any>} */
-	const parsedArgs = {};
+  /** @type {Record<string, any>} */
+  const parsedArgs = {};
 
-	if (args.length <= 1) {
-		return;
-	}
+  if (args.length <= 1) {
+    return;
+  }
 
-	// every even index is a string, every odd index is an object
-	for (let i = 0; i < args.length; i += 2) {
-		parsedArgs[args[i]] = args[i + 1];
-	}
+  // every even index is a string, every odd index is an object
+  for (let i = 0; i < args.length; i += 2) {
+    parsedArgs[args[i]] = args[i + 1];
+  }
 
-	return parsedArgs;
+  return parsedArgs;
 }
 
 /**
@@ -176,313 +175,315 @@ function parseKeyValueArgs(args) {
  * @param {any} value
  */
 function formatArgs(value) {
-	if (value instanceof Event) {
-		return `${tint(COLORS.FgYellow, value.constructor.name)}${tint(
-			COLORS.FgGray,
-			`{"${value.type}"}`
-		)}`;
-	}
-	if (value instanceof Error) {
-		return `${value.message}\n${value.stack ? tint(COLORS.FgGray, value.stack) : ''}\n`;
-	}
-	if (typeof value === 'object' && value !== null) {
-		const name = tint(COLORS.FgYellow, value.constructor.name);
+  if (value instanceof Event) {
+    return `${tint(COLORS.FgYellow, value.constructor.name)}${tint(
+      COLORS.FgGray,
+      `{"${value.type}"}`,
+    )}`;
+  }
+  if (value instanceof Error) {
+    return `${value.message}\n${value.stack ? tint(COLORS.FgGray, value.stack) : ""}\n`;
+  }
+  if (typeof value === "object" && value !== null) {
+    const name = tint(COLORS.FgYellow, value.constructor.name);
 
-		if (Object.keys(value).length > 3) {
-			return `${name}${JSON.stringify(value, undefined, '  ')}`;
-		}
-		return `${name}${tint(COLORS.FgGray, JSON.stringify(value))}`;
-	}
-	if (typeof value === 'number') {
-		return tint(COLORS.FgYellow, value.toString());
-	}
-	if (typeof value === 'boolean' && value === true) {
-		return tint(COLORS.FgGreen, value.toString());
-	}
-	if (typeof value === 'boolean' && value === false) {
-		return tint(COLORS.FgRed, value.toString());
-	}
-	return value;
+    if (Object.keys(value).length > 3) {
+      return `${name}${JSON.stringify(value, undefined, "  ")}`;
+    }
+    return `${name}${tint(COLORS.FgGray, JSON.stringify(value))}`;
+  }
+  if (typeof value === "number") {
+    return tint(COLORS.FgYellow, value.toString());
+  }
+  if (typeof value === "boolean" && value === true) {
+    return tint(COLORS.FgGreen, value.toString());
+  }
+  if (typeof value === "boolean" && value === false) {
+    return tint(COLORS.FgRed, value.toString());
+  }
+  return value;
 }
 
 class Logger {
-	/**
-	 * Log prefix
-	 * @type {string | undefined}
-	 */
-	#prefix = undefined;
+  /**
+   * Log prefix
+   * @type {string | undefined}
+   */
+  #prefix = undefined;
 
-	/**
-	 * Stack trace
-	 * @type {boolean}
-	 */
-	#trace = false;
+  /**
+   * Stack trace
+   * @type {boolean}
+   */
+  #trace = false;
 
-	/**
-	 * Timestamp
-	 * @type {boolean | "local" | "kitchen" | "iso" | "utc"}
-	 */
-	#time = 'local';
+  /**
+   * Timestamp
+   * @type {boolean | "local" | "kitchen" | "iso" | "utc"}
+   */
+  #time = "local";
 
-	/**
-	 * Json output
-	 * @type {boolean}
-	 */
-	#json = false;
+  /**
+   * Json output
+   * @type {boolean}
+   */
+  #json = false;
 
-	/**
-	 * Log level by prefix scope or "*" for global scope
-	 * @type {Record<string, string>}
-	 */
-	#logLevel = {
-		'*': 'info',
-	};
+  /**
+   * Log level by prefix scope or "*" for global scope
+   * @type {Record<string, string>}
+   */
+  #logLevel = {
+    "*": "info",
+  };
 
-	/**
-	 * stdout or stderr
-	 */
-	#stdio = stderr;
+  /**
+   * stdout or stderr
+   */
+  #stdio = stderr;
 
-	/**
-	 * Writeable streams to pipe logs to
-	 * @type {Set<WritableStream<LogObject>>}
-	 */
-	#streams = new Set();
+  /**
+   * Writeable streams to pipe logs to
+   * @type {Set<WritableStream<LogObject>>}
+   */
+  #streams = new Set();
 
-	/**
-	 * Set prefix
-	 * @param {string} prefix
-	 */
-	prefix(prefix) {
-		this.#prefix = prefix;
-		return this;
-	}
+  /**
+   * Set prefix
+   * @param {string} prefix
+   */
+  prefix(prefix) {
+    this.#prefix = prefix;
+    return this;
+  }
 
-	/**
-	 * Set tmestamp format
-	 * @param {boolean | "local" | "kitchen" | "iso" | "utc"} format
-	 */
-	time(format) {
-		this.#time = format;
-		return this;
-	}
+  /**
+   * Set tmestamp format
+   * @param {boolean | "local" | "kitchen" | "iso" | "utc"} format
+   */
+  time(format) {
+    this.#time = format;
+    return this;
+  }
 
-	/**
-	 * Enable stack tracing
-	 */
-	trace() {
-		this.#trace = true;
-		return this;
-	}
+  /**
+   * Enable stack tracing
+   */
+  trace() {
+    this.#trace = true;
+    return this;
+  }
 
-	/**
-	 * Enable stack tracing
-	 */
-	json() {
-		this.#json = true;
-		return this;
-	}
+  /**
+   * Enable stack tracing
+   */
+  json() {
+    this.#json = true;
+    return this;
+  }
 
-	constructor(stdio = stderr) {
-		this.#stdio = stdio;
-		this.#logLevel = parseLogLevel(
-			IS_RUNTIME ? process.env.JS_LOG || global.JS_LOG : global.JS_LOG
-		);
-	}
+  constructor(stdio = stderr) {
+    this.#stdio = stdio;
+    this.#logLevel = parseLogLevel(
+      IS_RUNTIME ? process.env.JS_LOG || global.JS_LOG : global.JS_LOG,
+    );
+  }
 
-	/**
-	 * Return formatted string of preamble
-	 * @param {LogObject} obj
-	 */
-	#preabmle = (obj) => {
-		return `${[
-			this.#time && timestamp(this.#time, obj.ts),
-			obj.level && flevel(obj.level),
-			obj.location && tint(COLORS.FgGray, `<${obj.location}>`),
-			obj.prefix && tint(COLORS.FgGray, `${obj.prefix}:`),
-			obj.message,
-		]
-			.filter(Boolean)
-			.join(' ')}`;
-	};
+  /**
+   * Return formatted string of preamble
+   * @param {LogObject} obj
+   */
+  #preabmle = (obj) => {
+    return `${[
+      this.#time && timestamp(this.#time, obj.ts),
+      obj.level && flevel(obj.level),
+      obj.location && tint(COLORS.FgGray, `<${obj.location}>`),
+      obj.prefix && tint(COLORS.FgGray, `${obj.prefix}:`),
+      obj.message,
+    ]
+      .filter(Boolean)
+      .join(" ")}`;
+  };
 
-	/**
-	 * Send log object
-	 * @param {LogObject} obj
-	 */
-	#log = (obj) => {
-		if (!this.checkLevel(obj.level)) return;
+  /**
+   * Send log object
+   * @param {LogObject} obj
+   */
+  #log = (obj) => {
+    if (!this.checkLevel(obj.level)) return;
 
-		if (IS_RUNTIME) {
-			this.#stdio?.write(`${this.#print(obj)}\n`);
-		}
+    if (IS_RUNTIME) {
+      this.#stdio?.write(`${this.#print(obj)}\n`);
+    }
 
-		if (IS_BROWSER) {
-			const write = consoleLevelMap[obj.level] || console.log;
+    if (IS_BROWSER) {
+      const write = consoleLevelMap[obj.level] || console.log;
 
-			if (this.#json) {
-				write(obj);
-			} else {
-				const str = this.#preabmle(obj);
-				const parsedArgs = parseKeyValueArgs(obj.args);
+      if (this.#json) {
+        write(obj);
+      } else {
+        const str = this.#preabmle(obj);
+        const parsedArgs = parseKeyValueArgs(obj.args);
 
-				if (parsedArgs) {
-					/** @type {any[]} */
-					const args = [];
-					let fstr = '';
+        if (parsedArgs) {
+          /** @type {any[]} */
+          const args = [];
+          let fstr = "";
 
-					for (const key of Object.keys(parsedArgs)) {
-						fstr += ` ${tint(COLORS.FgGray, key)}=%o`;
-						args.push(parsedArgs[key]);
-					}
+          for (const key of Object.keys(parsedArgs)) {
+            fstr += ` ${tint(COLORS.FgGray, key)}=%o`;
+            args.push(parsedArgs[key]);
+          }
 
-					write(`%s${fstr}`, str, ...args);
-				} else {
-					write(str, ...obj.args);
-				}
-			}
-		}
+          write(`%s${fstr}`, str, ...args);
+        } else {
+          write(str, ...obj.args);
+        }
+      }
+    }
 
-		for (const stream of this.#streams) {
-			const writer = stream.getWriter();
-			writer.write(obj);
-			writer.releaseLock();
-		}
-	};
+    for (const stream of this.#streams) {
+      const writer = stream.getWriter();
+      writer.write(obj);
+      writer.releaseLock();
+    }
+  };
 
-	/**
-	 * Check log level
-	 * @private
-	 * @param {string} level
-	 * @returns {boolean}
-	 */
-	checkLevel = (level) => {
-		if (
-			LOG_LEVELS.indexOf(level) >
-			LOG_LEVELS.indexOf(this.#logLevel[this.#prefix || '*'] || this.#logLevel['*'])
-		)
-			return false;
+  /**
+   * Check log level
+   * @private
+   * @param {string} level
+   * @returns {boolean}
+   */
+  checkLevel = (level) => {
+    if (
+      LOG_LEVELS.indexOf(level) >
+      LOG_LEVELS.indexOf(
+        this.#logLevel[this.#prefix || "*"] || this.#logLevel["*"],
+      )
+    )
+      return false;
 
-		return true;
-	};
+    return true;
+  };
 
-	/**
-	 * @param {LogObject} obj
-	 */
-	#print = (obj) => {
-		if (this.#json) {
-			return JSON.stringify(obj);
-		}
+  /**
+   * @param {LogObject} obj
+   */
+  #print = (obj) => {
+    if (this.#json) {
+      return JSON.stringify(obj);
+    }
 
-		const str = this.#preabmle(obj);
-		const parsedArgs = parseKeyValueArgs(obj.args);
+    const str = this.#preabmle(obj);
+    const parsedArgs = parseKeyValueArgs(obj.args);
 
-		if (parsedArgs) {
-			const args = [];
-			for (const key of Object.keys(parsedArgs)) {
-				args.push(`${tint(COLORS.FgGray, key)}=${formatArgs(parsedArgs[key])}`);
-			}
-			return `${str} ${args.join(' ')}`;
-		}
+    if (parsedArgs) {
+      const args = [];
+      for (const key of Object.keys(parsedArgs)) {
+        args.push(`${tint(COLORS.FgGray, key)}=${formatArgs(parsedArgs[key])}`);
+      }
+      return `${str} ${args.join(" ")}`;
+    }
 
-		if (obj.args.length > 0) {
-			return `${str} ${obj.args.map(formatArgs).join(' ')}`;
-		}
+    if (obj.args.length > 0) {
+      return `${str} ${obj.args.map(formatArgs).join(" ")}`;
+    }
 
-		return str;
-	};
+    return str;
+  };
 
-	/**
-	 * Return formatted string
-	 * @param {'error' | 'warn' | 'info' | 'debug'} level
-	 * @param {any[]} args
-	 * @returns {LogObject}
-	 */
-	#parseArgs = (level, args) => {
-		return {
-			ts: new Date(),
-			level: level,
-			prefix: this.#prefix,
-			location: this.#trace && trace(),
-			message: args[0],
-			args: args.slice(1),
-		};
-	};
+  /**
+   * Return formatted string
+   * @param {'error' | 'warn' | 'info' | 'debug'} level
+   * @param {any[]} args
+   * @returns {LogObject}
+   */
+  #parseArgs = (level, args) => {
+    return {
+      ts: new Date(),
+      level: level,
+      prefix: this.#prefix,
+      location: this.#trace && trace(),
+      message: args[0],
+      args: args.slice(1),
+    };
+  };
 
-	/**
-	 * Pipe logs to stream
-	 * @param {WritableStream} stream
-	 */
-	pipeTo(stream) {
-		this.#streams.add(stream);
-		return this;
-	}
+  /**
+   * Pipe logs to stream
+   * @param {WritableStream} stream
+   */
+  pipeTo(stream) {
+    this.#streams.add(stream);
+    return this;
+  }
 
-	/**
-	 * Return formatted log string
-	 * @param {'error' | 'warn' | 'info' | 'debug'} level
-	 * @param {any[]} args
-	 */
-	sprint = (level, ...args) => {
-		return this.#print(this.#parseArgs(level, args));
-	};
+  /**
+   * Return formatted log string
+   * @param {'error' | 'warn' | 'info' | 'debug'} level
+   * @param {any[]} args
+   */
+  sprint = (level, ...args) => {
+    return this.#print(this.#parseArgs(level, args));
+  };
 
-	/**
-	 * Log info
-	 * @param  {...any} args
-	 */
-	info = (...args) => {
-		this.#log(this.#parseArgs('info', args));
-	};
+  /**
+   * Log info
+   * @param  {...any} args
+   */
+  info = (...args) => {
+    this.#log(this.#parseArgs("info", args));
+  };
 
-	/**
-	 * Log error
-	 * @param  {...any} args
-	 */
-	error = (...args) => {
-		this.#log(this.#parseArgs('error', args));
-	};
+  /**
+   * Log error
+   * @param  {...any} args
+   */
+  error = (...args) => {
+    this.#log(this.#parseArgs("error", args));
+  };
 
-	/**
-	 * Log warning
-	 * @param  {...any} args
-	 */
-	warn = (...args) => {
-		this.#log(this.#parseArgs('warn', args));
-	};
+  /**
+   * Log warning
+   * @param  {...any} args
+   */
+  warn = (...args) => {
+    this.#log(this.#parseArgs("warn", args));
+  };
 
-	/**
-	 * Log debug
-	 * @param  {...any} args
-	 */
-	debug = (...args) => {
-		this.#log(this.#parseArgs('debug', args));
-	};
+  /**
+   * Log debug
+   * @param  {...any} args
+   */
+  debug = (...args) => {
+    this.#log(this.#parseArgs("debug", args));
+  };
 
-	/**
-	 * An assertion. Throws an error if condition is false.
-	 * @param {any} condition
-	 * @param {string} [message]
-	 */
-	assert = (condition, message) => {
-		if (
-			condition === false ||
-			condition === undefined ||
-			condition === null ||
-			condition === ''
-		) {
-			const err = new AssertionError(message);
-			this.#log(this.#parseArgs('error', ['', 'assert', err]));
-			throw err;
-		}
-	};
+  /**
+   * An assertion. Throws an error if condition is false.
+   * @param {any} condition
+   * @param {string} [message]
+   */
+  assert = (condition, message) => {
+    if (
+      condition === false ||
+      condition === undefined ||
+      condition === null ||
+      condition === ""
+    ) {
+      const err = new AssertionError(message);
+      this.#log(this.#parseArgs("error", ["", "assert", err]));
+      throw err;
+    }
+  };
 }
 
 /**
  * Logger builder
  */
 export default function logger() {
-	return new Logger();
+  return new Logger();
 }
 
 class AssertionError extends Error {}
@@ -493,16 +494,16 @@ class AssertionError extends Error {}
  * @param {string} [message]
  */
 export function assert(condition, message) {
-	if (
-		condition === false ||
-		condition === undefined ||
-		condition === null ||
-		condition === ''
-	) {
-		const err = new AssertionError(message);
-		logger().trace().error('', 'assert', err);
-		throw err;
-	}
+  if (
+    condition === false ||
+    condition === undefined ||
+    condition === null ||
+    condition === ""
+  ) {
+    const err = new AssertionError(message);
+    logger().trace().error("", "assert", err);
+    throw err;
+  }
 }
 
 /**
@@ -510,7 +511,7 @@ export function assert(condition, message) {
  * @param {string} message
  */
 export function todo(message) {
-	const err = new AssertionError(message);
-	logger().trace().error('', 'TODO', err);
-	throw err;
+  const err = new AssertionError(message);
+  logger().trace().error("", "TODO", err);
+  throw err;
 }
