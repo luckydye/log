@@ -13,6 +13,9 @@
     },
     "./influx": {
       "import": "./influx.js"
+    },
+    "./sentry": {
+      "import": "./sentry.js"
     }
   },
   "type": "module",
