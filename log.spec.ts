@@ -1,6 +1,8 @@
+// @ts-ignore
 import { afterEach, expect, test } from 'bun:test';
 import { InfluxWriteStream } from './influx';
 import logger, { assert, todo } from './log.js';
+import { resolve } from 'node:path';
 
 afterEach(() => {
 	process.env.JS_LOG = 'debug';
@@ -76,7 +78,7 @@ test('log format', () => {
 	const str = log.sprint('error', 'Hello, world!');
 
 	const expected =
-		'\u001B[31mERROR\u001B[0m \u001B[90m<log.spec.ts:47:47>\u001B[0m Hello, world!';
+		'\u001B[31mERROR\u001B[0m \u001B[90m<log.spec.ts:78:18>\u001B[0m Hello, world!';
 
 	expect(str).toBe(expected);
 });
@@ -128,4 +130,10 @@ test('todo', () => {
 	}
 
 	throw new Error('Assertion failed to throw');
+});
+
+test('print image', () => {
+	const log = logger();
+
+	log.img(resolve('./success.png'));
 });

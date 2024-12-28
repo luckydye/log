@@ -1,3 +1,4 @@
+const ESC = "\x1b";
 const IS_BROWSER =
   typeof window !== "undefined" && typeof window.document !== "undefined";
 const IS_RUNTIME = !IS_BROWSER && typeof process !== "undefined";
@@ -477,6 +478,14 @@ class Logger {
       throw err;
     }
   };
+
+  /**
+   * Log image
+   * @param {string | ArrayBuffer} filenameOrBuffer
+   */
+  img = (filenameOrBuffer) => {
+    printImage(filenameOrBuffer, process.stdout);
+  };
 }
 
 /**
@@ -514,4 +523,73 @@ export function todo(message) {
   const err = new AssertionError(message);
   logger().trace().error("", "TODO", err);
   throw err;
+}
+
+// Image support
+//
+
+/**
+ * @param {ArrayBuffer | Array<number>} data
+ */
+function encode(data) {
+  return btoa(
+    new Uint8Array(data).reduce(
+      (data, byte) => data + String.fromCharCode(byte),
+      "",
+    ),
+  );
+}
+
+let imageIdInc = 0;
+const imageIds = new Map();
+
+/**
+ * Print image to terminal
+ * @param {string | ArrayBuffer} filenameOrBuffer - Absolute path to image or image buffer
+ * @param {NodeJS.WriteStream} io
+ */
+export function printImage(filenameOrBuffer, io) {
+  // TODO: Query Support
+  //
+  // const p = spawnSync(
+  //   "printf",
+  //   [`${ESC}_Gi=12312312312,s=1,v=1,a=q,t=d,f=24;AAAA${ESC}\\`],
+  //   {
+  //     stdio: ["pipe", "pipe", "inherit"],
+  //   },
+  // );
+  // console.info(p.stdout.buffer);
+  // return;
+
+  // TODO: use cache by id
+  //
+  // const cachedImageId = imageIds.get(filenameOrBuffer);
+  // if (cachedImageId) {
+  //   io.write(`${ESC}_Ga=p,i=${cachedImageId},q=2;${ESC}\\\n`);
+  //   return;
+  // }
+
+  imageIdInc++;
+  imageIds.set(filenameOrBuffer, imageIdInc);
+
+  if (typeof filenameOrBuffer === "string") {
+    const encoder = new TextEncoder();
+    const name = encoder.encode(filenameOrBuffer);
+    io.write(`${ESC}_Gi=${imageIdInc},q=2,f=100,t=f;${encode(name)}${ESC}\\`);
+  } else {
+    io.write(
+      `${ESC}_Gi=${imageIdInc},q=2,f=100,t=d;${encode(filenameOrBuffer)}${ESC}\\`,
+    );
+  }
+
+  io.write(`${ESC}_Ga=p,i=${imageIdInc},q=2${ESC}\\\n`);
+
+  // TODO: Unicode placement
+  // io.write(`${ESC}_Ga=p,U=1,i=${imageIdInc},q=2${ESC}\\\n`);
+  // io.write(
+  //   `${ESC}[38;5;${imageIdInc}m\\U10EEEE\\U0305\\U0305\\U10EEEE\\U0305\\U030D${ESC}[39m\n`,
+  // );
+  // io.write(
+  //   `${ESC}[38;5;${imageIdInc}m\\U10EEEE\\U030D\\U0305\\U10EEEE\\U030D\\U030D${ESC}[39m\n`,
+  // );
 }

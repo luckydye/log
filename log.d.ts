@@ -7,16 +7,22 @@ export default function logger(): Logger;
  * @param {any} condition
  * @param {string} [message]
  */
-export function assert(condition: any, message?: string | undefined): void;
+export function assert(condition: any, message?: string): void;
 /**
  * Creates a temporary logger and calls its assert method with a TODO message.
  * @param {string} message
  */
 export function todo(message: string): void;
+/**
+ * Print image to terminal
+ * @param {string | ArrayBuffer} filenameOrBuffer
+ * @param {NodeJS.WriteStream} io
+ */
+export function printImage(filenameOrBuffer: string | ArrayBuffer, io: NodeJS.WriteStream): void;
 export type Env = NodeJS.ProcessEnv;
 export type LogObject = {
     ts: Date;
-    level: 'error' | 'warn' | 'info' | 'debug';
+    level: "error" | "warn" | "info" | "debug";
     prefix?: string;
     location?: string | false;
     message?: string;
@@ -61,7 +67,7 @@ declare class Logger {
      * @param {'error' | 'warn' | 'info' | 'debug'} level
      * @param {any[]} args
      */
-    sprint: (level: 'error' | 'warn' | 'info' | 'debug', ...args: any[]) => string;
+    sprint: (level: "error" | "warn" | "info" | "debug", ...args: any[]) => string;
     /**
      * Log info
      * @param  {...any} args
@@ -87,7 +93,12 @@ declare class Logger {
      * @param {any} condition
      * @param {string} [message]
      */
-    assert: (condition: any, message?: string | undefined) => void;
+    assert: (condition: any, message?: string) => void;
+    /**
+     * Log image
+     * @param {string | ArrayBuffer} filenameOrBuffer
+     */
+    img: (filenameOrBuffer: string | ArrayBuffer) => void;
     #private;
 }
 export {};
