@@ -14,11 +14,18 @@ export function assert(condition: any, message?: string): void;
  */
 export function todo(message: string): void;
 /**
- * Print image to terminal
- * @param {string | ArrayBuffer} filenameOrBuffer
+ * Send an image to the terminal
+ * @param {string | ArrayBuffer} filenameOrBuffer - Absolute path to image or image buffer
  * @param {NodeJS.WriteStream} io
+ * @param {string} [imageId]
  */
-export function printImage(filenameOrBuffer: string | ArrayBuffer, io: NodeJS.WriteStream): void;
+export function sendImage(filenameOrBuffer: string | ArrayBuffer, io: NodeJS.WriteStream, imageId?: string): string;
+/**
+ * Print image to terminal
+ * @param {NodeJS.WriteStream} io
+ * @param {string} [imageId]
+ */
+export function printImage(io: NodeJS.WriteStream, imageId?: string): void;
 export type Env = NodeJS.ProcessEnv;
 export type LogObject = {
     ts: Date;
@@ -95,10 +102,12 @@ declare class Logger {
      */
     assert: (condition: any, message?: string) => void;
     /**
-     * Log image
-     * @param {string | ArrayBuffer} filenameOrBuffer
+     * Log an image. Only works in terminals that support the kitty graphics protocol.
+     * @param {string | ArrayBuffer} [filenameOrBuffer]
+     * @param {string} [imageId]
+     * @param {boolean} [display]
      */
-    img: (filenameOrBuffer: string | ArrayBuffer) => void;
+    img: (filenameOrBuffer?: string | ArrayBuffer, imageId?: string, display?: boolean) => void;
     #private;
 }
 export {};

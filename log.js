@@ -480,11 +480,25 @@ class Logger {
   };
 
   /**
-   * Log image
-   * @param {string | ArrayBuffer} filenameOrBuffer
+   * Log an image. Only works in terminals that support the kitty graphics protocol.
+   * @param {string | ArrayBuffer} [filenameOrBuffer]
+   * @param {string} [imageId]
+   * @param {boolean} [display]
    */
-  img = (filenameOrBuffer) => {
-    printImage(filenameOrBuffer, process.stdout);
+  img = (filenameOrBuffer, imageId, display = true) => {
+    if (!this.#stdio) {
+      return;
+    }
+
+    let id = imageId;
+
+    if (filenameOrBuffer) {
+      id = sendImage(filenameOrBuffer, this.#stdio, imageId);
+    }
+
+    if (display) {
+      printImage(this.#stdio, id);
+    }
   };
 }
 
@@ -525,13 +539,11 @@ export function todo(message) {
   throw err;
 }
 
-// Image support
-//
-
 /**
+ * Encode buffer to base64
  * @param {ArrayBuffer | Array<number>} data
  */
-function encode(data) {
+function base64(data) {
   return btoa(
     new Uint8Array(data).reduce(
       (data, byte) => data + String.fromCharCode(byte),
@@ -541,14 +553,15 @@ function encode(data) {
 }
 
 let imageIdInc = 0;
-const imageIds = new Map();
+// const imageIds = new Map();
 
 /**
- * Print image to terminal
+ * Send an image to the terminal
  * @param {string | ArrayBuffer} filenameOrBuffer - Absolute path to image or image buffer
  * @param {NodeJS.WriteStream} io
+ * @param {string} [imageId]
  */
-export function printImage(filenameOrBuffer, io) {
+export function sendImage(filenameOrBuffer, io, imageId) {
   // TODO: Query Support
   //
   // const p = spawnSync(
@@ -569,20 +582,18 @@ export function printImage(filenameOrBuffer, io) {
   //   return;
   // }
 
-  imageIdInc++;
-  imageIds.set(filenameOrBuffer, imageIdInc);
+  const id = imageId || (++imageIdInc).toString();
+  // imageIds.set(filenameOrBuffer, id);
 
   if (typeof filenameOrBuffer === "string") {
     const encoder = new TextEncoder();
     const name = encoder.encode(filenameOrBuffer);
-    io.write(`${ESC}_Gi=${imageIdInc},q=2,f=100,t=f;${encode(name)}${ESC}\\`);
+    io.write(`${ESC}_Gi=${id},q=2,f=100,t=f;${base64(name)}${ESC}\\`);
   } else {
     io.write(
-      `${ESC}_Gi=${imageIdInc},q=2,f=100,t=d;${encode(filenameOrBuffer)}${ESC}\\`,
+      `${ESC}_Gi=${id},q=2,f=100,t=d;${base64(filenameOrBuffer)}${ESC}\\`,
     );
   }
-
-  io.write(`${ESC}_Ga=p,i=${imageIdInc},q=2${ESC}\\\n`);
 
   // TODO: Unicode placement
   // io.write(`${ESC}_Ga=p,U=1,i=${imageIdInc},q=2${ESC}\\\n`);
@@ -592,4 +603,15 @@ export function printImage(filenameOrBuffer, io) {
   // io.write(
   //   `${ESC}[38;5;${imageIdInc}m\\U10EEEE\\U030D\\U0305\\U10EEEE\\U030D\\U030D${ESC}[39m\n`,
   // );
+
+  return id;
+}
+
+/**
+ * Print image to terminal
+ * @param {NodeJS.WriteStream} io
+ * @param {string} [imageId]
+ */
+export function printImage(io, imageId) {
+  io.write(`${ESC}_Ga=p,i=${imageId},q=2${ESC}\\\n`);
 }
