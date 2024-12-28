@@ -30,6 +30,12 @@ SyntaxError: Test error
     at <anonymous> (/Users/tihav/source/log/log.spec.ts:82:1)
 ```
 
+### Log images to supporting terminals
+
+```javascript
+log.img(path.resolve("./success.png"));
+```
+
 ### Formatted arguments
 
 ```javascript
