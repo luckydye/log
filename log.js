@@ -591,9 +591,10 @@ export function sendImage(filenameOrBuffer, io, imageId) {
   // imageIds.set(filenameOrBuffer, id);
 
   if (typeof filenameOrBuffer === "string") {
-    const encoder = new TextEncoder();
-    const name = encoder.encode(filenameOrBuffer);
-    io.write(textEncoder.encode(`\x1b_Gi=${id},q=2,f=100,t=f;${name}\x1b\\`));
+    const name = textEncoder.encode(filenameOrBuffer);
+    io.write(
+      textEncoder.encode(`\x1b_Gi=${id},q=2,f=100,t=f;${base64(name)}\x1b\\`),
+    );
   } else {
     io.write(
       textEncoder.encode(
