@@ -1,12 +1,15 @@
 const ESC = "\x1b";
 const IS_BROWSER =
   typeof window !== "undefined" && typeof window.document !== "undefined";
-const IS_RUNTIME = !IS_BROWSER && typeof process !== "undefined";
-
-const stderr = IS_RUNTIME ? process.stderr : undefined;
+const IS_RUNTIME = !IS_BROWSER;
 
 /** @type {any} */
 const global = globalThis;
+
+const proc = global.process || global.Deno || {};
+const stderr = IS_RUNTIME ? proc.stderr : undefined;
+
+const textEncoder = new TextEncoder();
 
 /**
  * @typedef {NodeJS.ProcessEnv} Env
@@ -285,8 +288,9 @@ class Logger {
 
   constructor(stdio = stderr) {
     this.#stdio = stdio;
+
     this.#logLevel = parseLogLevel(
-      IS_RUNTIME ? process.env.JS_LOG || global.JS_LOG : global.JS_LOG,
+      IS_RUNTIME ? proc.env.JS_LOG || global.JS_LOG || "error" : global.JS_LOG,
     );
   }
 
@@ -314,7 +318,7 @@ class Logger {
     if (!this.checkLevel(obj.level)) return;
 
     if (IS_RUNTIME) {
-      this.#stdio?.write(`${this.#print(obj)}\n`);
+      this.#stdio?.write(textEncoder.encode(`${this.#print(obj)}\n`));
     }
 
     if (IS_BROWSER) {
@@ -486,7 +490,7 @@ class Logger {
    * @param {boolean} [display]
    */
   img = (filenameOrBuffer, imageId, display = true) => {
-    if (!this.#stdio) {
+    if (!this.#stdio || !IS_RUNTIME) {
       return;
     }
 
@@ -504,9 +508,10 @@ class Logger {
 
 /**
  * Logger builder
+ ^ @param {NodeJS.WriteStream} [stdio]
  */
-export default function logger() {
-  return new Logger();
+export default function logger(stdio) {
+  return new Logger(stdio);
 }
 
 class AssertionError extends Error {}
@@ -588,10 +593,12 @@ export function sendImage(filenameOrBuffer, io, imageId) {
   if (typeof filenameOrBuffer === "string") {
     const encoder = new TextEncoder();
     const name = encoder.encode(filenameOrBuffer);
-    io.write(`${ESC}_Gi=${id},q=2,f=100,t=f;${base64(name)}${ESC}\\`);
+    io.write(textEncoder.encode(`\x1b_Gi=${id},q=2,f=100,t=f;${name}\x1b\\`));
   } else {
     io.write(
-      `${ESC}_Gi=${id},q=2,f=100,t=d;${base64(filenameOrBuffer)}${ESC}\\`,
+      textEncoder.encode(
+        `${ESC}_Gi=${id},q=2,f=100,t=d;${base64(filenameOrBuffer)}${ESC}\\`,
+      ),
     );
   }
 
@@ -613,5 +620,5 @@ export function sendImage(filenameOrBuffer, io, imageId) {
  * @param {string} [imageId]
  */
 export function printImage(io, imageId) {
-  io.write(`${ESC}_Ga=p,i=${imageId},q=2${ESC}\\\n`);
+  io.write(textEncoder.encode(`${ESC}_Ga=p,i=${imageId},q=2${ESC}\\\n`));
 }
